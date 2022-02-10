@@ -1,0 +1,23 @@
+name: Build
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Update agda
+      run: |
+        sudo sed -i 's/focal/hirsute/' /etc/apt/sources.list
+        sudo apt-get -y update
+    - name: Install packages
+      run: sudo apt-get -y install agda
+    - name: Download cubical library
+      run: |
+        git clone --branch v0.2 https://github.com/agda/cubical.git
+        mkdir ~/.agda
+        echo "cubical" > ~/.agda/defaults
+        echo "`pwd`/cubical/cubical.agda-lib" > ~/.agda/libraries
+    - name: Build Agda
+      run: make
