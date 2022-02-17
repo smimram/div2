@@ -24,7 +24,7 @@ open import Cubical.HITs.SetQuotients as []
 
 open import Ends
 
-module Switch {ℓ} {A B : Type ℓ} (SA : isSet A) (SB : isSet B) (isom : Iso (A × End) (B × End)) where
+module Switch {ℓ} {A B : Type ℓ} (SA : isSet A) (SB : isSet B) (isom : A × End ≃ B × End) where
 
 open import Arrows SA SB isom
 open import Bracketing SA SB isom
@@ -37,20 +37,20 @@ switch : Arrows → Type₀
 switch a =
   (¬ (matched a)) ×
   Σ ℕ (λ n →
-    let b = iterate (fromℕ n) (fw a) in
+    let b = iterate (fromℕ n) (bw a) in
     -- b is in opposite direction
-    (end b ≡ tgt) ×
+    (end b ≡ src) ×
     -- b is not bracketed
     (¬ (matched (arrow b))) ×
     -- all intermediate elements are bracketed
-    ((k : ℕ) → suc k < n → matched (arrow (iterate (fromℕ (suc k)) (fw a))))
+    ((k : ℕ) → suc k < n → matched (arrow (iterate (fromℕ (suc k)) (bw a))))
    )
 
 switch-isProp : (a : Arrows) → isProp (switch a)
 switch-isProp a (m , n , e , b , l) (m' , n' , e' , b' , l') i =
   isPropΠ (λ _ → isProp⊥) m m' i ,
   n≡n' i ,
-  isSet→isSet' End-isSet e e' (cong (λ n → end (iterate (fromℕ n) (fw a))) n≡n') refl i ,
+  isSet→isSet' End-isSet e e' (cong (λ n → end (iterate (fromℕ n) (bw a))) n≡n') refl i ,
   b≡b' i ,
   l≡l' i
   where
@@ -60,25 +60,25 @@ switch-isProp a (m , n , e , b , l) (m' , n' , e' , b' , l') i =
   n≡n' : n ≡ n'
   n≡n' with n ≟ n'
   n≡n' | lt n<n' with isZero n
-  n≡n' | lt n<n' | inl n≡0 = ⊥.rec (src≢tgt (cong (λ n → end (iterate (fromℕ n) (fw a))) (sym n≡0) ∙ e))
+  n≡n' | lt n<n' | inl n≡0 = ⊥.rec (src≢tgt (sym (cong (λ n → end (iterate (fromℕ n) (bw a))) (sym n≡0) ∙ e)))
   n≡n' | lt n<n' | inr (n'' , n≡sn'') = ⊥.rec (b ma)
     where
-    ma : matched (arrow (iterate (fromℕ n) (fw a)))
-    ma = subst (λ n → matched (arrow (iterate (fromℕ n) (fw a)))) (sym n≡sn'') (l' n'' (subst (λ n → n < n') n≡sn'' n<n'))
+    ma : matched (arrow (iterate (fromℕ n) (bw a)))
+    ma = subst (λ n → matched (arrow (iterate (fromℕ n) (bw a)))) (sym n≡sn'') (l' n'' (subst (λ n → n < n') n≡sn'' n<n'))
   n≡n' | eq n≡n' = n≡n'
   n≡n' | gt n'<n with isZero n'
-  n≡n' | gt n'<n | inl n'≡0 = ⊥.rec (src≢tgt (cong (λ n' → end (iterate (fromℕ n') (fw a))) (sym n'≡0) ∙ e'))
+  n≡n' | gt n'<n | inl n'≡0 = ⊥.rec (src≢tgt (sym (cong (λ n' → end (iterate (fromℕ n') (bw a))) (sym n'≡0) ∙ e')))
   n≡n' | gt n'<n | inr (n'' , n'≡sn'') = ⊥.rec (b' ma)
     where
-    ma : matched (arrow (iterate (fromℕ n') (fw a)))
-    ma = subst (λ n' → matched (arrow (iterate (fromℕ n') (fw a)))) (sym n'≡sn'') (l n'' (subst (λ n' → n' < n) n'≡sn'' n'<n))
-  b≡b' : PathP (λ j → ¬ (matched (arrow (iterate (fromℕ (n≡n' j)) (fw a))))) b b'
+    ma : matched (arrow (iterate (fromℕ n') (bw a)))
+    ma = subst (λ n' → matched (arrow (iterate (fromℕ n') (bw a)))) (sym n'≡sn'') (l n'' (subst (λ n' → n' < n) n'≡sn'' n'<n))
+  b≡b' : PathP (λ j → ¬ (matched (arrow (iterate (fromℕ (n≡n' j)) (bw a))))) b b'
   b≡b' = toPathP (isPropΠ (λ _ → isProp⊥) _ _)
-  l≡l' : PathP (λ i → ((k : ℕ) → suc k < n≡n' i → matched (arrow (iterate (fromℕ (suc k)) (fw a))))) l l'
-  l≡l' = toPathP (isPropΠ2 (λ k _ → matched-isProp (arrow (iterate (fromℕ (suc k)) (fw a)))) _ _)
+  l≡l' : PathP (λ i → ((k : ℕ) → suc k < n≡n' i → matched (arrow (iterate (fromℕ (suc k)) (bw a))))) l l'
+  l≡l' = toPathP (isPropΠ2 (λ k _ → matched-isProp (arrow (iterate (fromℕ (suc k)) (bw a)))) _ _)
 
 -- the chain of an arrow is switched
-switched-end : Ends → Type ℓ
+switched-end : dArrows → Type ℓ
 switched-end e₀ = Σ ℤ (λ n →
   let e = iterate n e₀ in
     -- we have to suppose that this is left, otherwise we have two witnesses
@@ -87,14 +87,14 @@ switched-end e₀ = Σ ℤ (λ n →
   )
 
 -- being switched is a proposition
-switched-end-isProp : (a : Ends) → isProp (switched-end a)
+switched-end-isProp : (a : dArrows) → isProp (switched-end a)
 switched-end-isProp a (n , l , s) (n' , l' , s') with n ℤ.≟ n'
 ... | lt n<n' = {!!} -- combinatorial argument
 ... | eq n≡n' = ΣPathP (n≡n' , (toPathP (ΣPathP (in-left-isProp _ _ _ , switch-isProp _ _ _))))
 ... | gt n'<n = {!!} -- here also
 
 -- being switched is independent of the starting point
-switched-end-indep : {a b : Ends} (r : reachable a b) → switched-end a ≡ switched-end b
+switched-end-indep : {a b : dArrows} (r : reachable a b) → switched-end a ≡ switched-end b
 switched-end-indep {a} {b} (nr , r) = ua (isoToEquiv i)
   where
   i : Iso (switched-end a) (switched-end b)
@@ -128,10 +128,10 @@ switched-end-indep {a} {b} (nr , r) = ua (isoToEquiv i)
         ℤ.zero ℤ.+ n            ≡⟨ ℤ.zero-+ n ⟩
         n                       ∎
 
-switched-end-op : (a : Ends) → switched-end (op a) ≡ switched-end a
+switched-end-op : (a : dArrows) → switched-end (op a) ≡ switched-end a
 switched-end-op a = ua (isoToEquiv i)
   where
-  F : (a : Ends) → switched-end (op a) → switched-end a
+  F : (a : dArrows) → switched-end (op a) → switched-end a
   F a (n , l , s) = ℤ.neg n , subst in-left p l , subst switch p s
     where
     p : arrow (iterate n (op a)) ≡ arrow (iterate (neg n) a)
@@ -201,22 +201,22 @@ switched-element c = [].elim
          el b sw .fst ∎
  
 -- all non-matched arrows are in the same direction
-sequential : Ends → Type₀
-sequential x = ((m n : ℤ) →
-    let y = iterate m x in
-    let z = iterate n x in
-    ¬ (matched (arrow y)) → ¬ (matched (arrow z)) → end y ≡ end z)
+sequential : dArrows → Type₀
+sequential o = ((m n : ℤ) →
+    let a = iterate m o in
+    let b = iterate n o in
+    ¬ (matched (arrow a)) → ¬ (matched (arrow b)) → end a ≡ end b)
 
-sequential-isProp : (a : Ends) → isProp (sequential a)
+sequential-isProp : (a : dArrows) → isProp (sequential a)
 sequential-isProp a = isPropΠ λ _ → isPropΠ λ _ → isPropΠ λ _ → isPropΠ λ _ → End-isSet _ _
 
-sequential-op : (a : Ends) → sequential (op a) ≡ sequential a
+sequential-op : (a : dArrows) → sequential (op a) ≡ sequential a
 sequential-op a = ua (isoToEquiv i)
   where
-  F : (a : Ends) → sequential (op a) → sequential a
+  F : (a : dArrows) → sequential (op a) → sequential a
   F a s n n' nm nm' = subst₂ _≡_ (p n a) (p n' a) (cong st (s (ℤ.neg n) (ℤ.neg n') (λ m → nm (subst (matched ∘ arrow)(iterate-neg-op n a) m)) λ m → nm' (subst (matched ∘ arrow) (iterate-neg-op n' a) m)))
     where
-    p : (n : ℤ) (a : Ends) → st (end (iterate (neg n) (op a))) ≡ end (iterate n a)
+    p : (n : ℤ) (a : dArrows) → st (end (iterate (neg n) (op a))) ≡ end (iterate n a)
     p n a = cong (st ∘ end) (iterate-neg-op n a) ∙ st² (end (iterate n a))
   i : Iso (sequential (op a)) (sequential a)
   Iso.fun i = F a
@@ -241,10 +241,10 @@ sequential-chain c = fst (sequential-chain-hP c)
 sequential-chain-isProp : (c : Chains) → isProp (sequential-chain c)
 sequential-chain-isProp c = snd (sequential-chain-hP c)
 
-non-matched : Ends → Type₀
+non-matched : dArrows → Type₀
 non-matched a = Σ ℤ (λ n → ¬ (matched (arrow (iterate n a))))
 
--- when we are sequantial if a and b are two reachable-arr arrows then b can be reached with the same direction as a
+-- when we are sequential if a and b are two reachable arrows then b can be reached with the same direction as a
 sequential→same-orientation : {o : Arrows} → sequential (fw o) → (ma mb : non-matched (fw o)) →
                               reachable-arr (arrow (iterate (fst ma) (fw o))) (arrow (iterate (fst mb) (fw o))) →
                               reachable (iterate (fst ma) (fw o)) (orient (arrow (iterate (fst mb) (fw o))) (end (iterate (fst ma) (fw o))))
@@ -254,9 +254,9 @@ sequential→same-orientation {o} seq ma mb = re
   na = fst ma
   nb : ℤ
   nb = fst mb
-  a : Ends
+  a : dArrows
   a = iterate (fst ma) (fw o)
-  b : Ends
+  b : dArrows
   b = iterate (fst mb) (fw o)
   ra : reachable (fw o) a
   ra = na , refl
@@ -270,13 +270,13 @@ sequential→same-orientation {o} seq ma mb = re
   re : reachable-arr (arrow a) (arrow b) → reachable a (orient (arrow b) (end a))
   re r = subst (reachable a ∘ orient (arrow b)) (sym eab) rab
 
-non-matched-indep : {a b : Ends} (r : reachable a b) → non-matched b → non-matched a
+non-matched-indep : {a b : dArrows} (r : reachable a b) → non-matched b → non-matched a
 non-matched-indep {a} (n , r) (m , nm) = n ℤ.+ m , N
   where
   abstract
     N = λ im → nm (subst (matched ∘ fst) (sym (iterate-+ n m a) ∙ cong (iterate m) r) im )
 
-non-matched-op : (a : Ends) → non-matched (op a) ≡ non-matched a
+non-matched-op : (a : dArrows) → non-matched (op a) ≡ non-matched a
 non-matched-op a = ua (isoToEquiv i)
   where
   i : Iso (non-matched (op a)) (non-matched a)
@@ -285,13 +285,13 @@ non-matched-op a = ua (isoToEquiv i)
   Iso.rightInv i (n , r) = ΣProp≡ (λ _ → isProp¬ _) (ℤ.neg-neg n)
   Iso.leftInv i (n , r) = ΣProp≡ (λ _ → isProp¬ _) (ℤ.neg-neg n)
 
-non-matched-indep² : {a b : Ends} (r : reachable a b) (nm : non-matched b) → non-matched-indep (reachable-sym r) (non-matched-indep r nm) ≡ nm
+non-matched-indep² : {a b : dArrows} (r : reachable a b) (nm : non-matched b) → non-matched-indep (reachable-sym r) (non-matched-indep r nm) ≡ nm
 non-matched-indep² (n , r) (m , nm) = ΣProp≡ (λ _ → isProp¬ _) (ℤ.+-assoc (ℤ.neg n) n m ∙ cong (λ k → k ℤ.+ m) (ℤ.neg+≡0 n) ∙ ℤ.zero-+ m)
 
-is-non-matched : Ends → Type₀
+is-non-matched : dArrows → Type₀
 is-non-matched a = ∥ non-matched a ∥
 
-is-non-matched-isProp : (a : Ends) → isProp (is-non-matched a)
+is-non-matched-isProp : (a : dArrows) → isProp (is-non-matched a)
 is-non-matched-isProp a = propTruncIsProp
 
 non-matched-chain-hP : Chains → hProp ℓ-zero
@@ -307,7 +307,7 @@ non-matched-chain c = fst (non-matched-chain-hP c)
 non-matched-chain-isProp : (c : Chains) → isProp (non-matched-chain c)
 non-matched-chain-isProp c = snd (non-matched-chain-hP c)
 
-slope : Ends → Type₀
+slope : dArrows → Type₀
 slope a = sequential a × is-non-matched a
 
 slope-chain : Chains → Type₀

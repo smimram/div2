@@ -2,11 +2,6 @@
 
 open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.Isomorphism
-open import Cubical.Data.Sigma
-open import Ends
-
-module Arrows {ℓ} {A B : Type ℓ} (SA : isSet A) (SB : isSet B) (isom : Iso (A × End) (B × End)) where
-
 open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.Function
 open import Cubical.Foundations.Isomorphism
@@ -21,28 +16,19 @@ open import Cubical.Data.Empty as ⊥
 open import Cubical.Data.Unit renaming (Unit to ⊤)
 open import Cubical.Data.Sum
 open import Cubical.Data.Sigma
+open import Cubical.HITs.PropositionalTruncation as ∥∥
+open import Cubical.HITs.SetQuotients as []
 open import Z as ℤ
 open import Cubical.Data.Nat as ℕ
 open import Cubical.Data.Nat.Order
 open import Nat as ℕ
 open import Misc
-open import Cubical.HITs.PropositionalTruncation as ∥∥
-open import Cubical.HITs.SetQuotients as []
 
-f : A × End → B × End
-f = Iso.fun isom
+open import Ends
 
-g : B × End → A × End
-g = Iso.inv isom
+module Arrows {ℓ} {A B : Type ℓ} (SA : isSet A) (SB : isSet B) (isom : A × End ≃ B × End) where
 
-g-f : (x : A × End) → g (f x) ≡ x
-g-f = Iso.leftInv isom
-
-f-g : (x : B × End) → f (g x) ≡ x
-f-g = Iso.rightInv isom
-
-Arrows : Type ℓ
-Arrows = A ⊎ B
+open import ArrowsBase isom public
 
 Arrows-isSet : isSet Arrows
 Arrows-isSet = isSet⊎ SA SB
@@ -63,12 +49,6 @@ B-discrete x y with LEM (SB x y)
 Arrows-discrete : Discrete Arrows
 Arrows-discrete = Discrete⊎ A-discrete B-discrete
 
-Ends : Type ℓ
-Ends = Arrows × End
-
--- an end seen as a directed arrow
-dArrows = Ends
-
 Ends-isSet : isSet Ends
 Ends-isSet = isSet× Arrows-isSet End-isSet
 
@@ -80,15 +60,6 @@ End-discrete tgt tgt = yes refl
 
 Ends-discrete : Discrete Ends
 Ends-discrete = Discrete× Arrows-discrete End-discrete
-
-arrow : dArrows → Arrows
-arrow = fst
-
-end : dArrows → End
-end = snd
-
-end≡ : {e e' : Ends} → arrow e ≡ arrow e' → end e ≡ end e' → e ≡ e'
-end≡ p q = ΣPathP (p , q)
 
 -- the other end of an arrow
 op : dArrows → dArrows
@@ -117,41 +88,6 @@ fw a = orient a src
 -- make the arrow point in the ← direction (we begin from the end)
 bw : Arrows → dArrows
 bw a = orient a tgt
-
--- next arrow: we always suppose that we are at the beginning of an arrow
-next : dArrows → dArrows
-next (inl a , d) = inr (fst (f (a , st d))) , snd (f (a , st d))
-next (inr b , d) = inl (fst (g (b , st d))) , snd (g (b , st d))
-
-prev : dArrows → dArrows
-prev (inl a , d) = inr (fst (f (a , d))) , st (snd (f (a , d)))
-prev (inr b , d) = inl (fst (g (b , d))) , st (snd (g (b , d)))
-
-next-prev : (x : dArrows) → next (prev x) ≡ x
-next-prev (inl a , d) = end≡ p q
-  where
-    p =
-      inl (fst (g (fst (f (a , d)) , st (st (snd (f (a , d))))))) ≡⟨ cong (inl ∘ fst ∘ g) (ΣPathP (refl , st² (snd (f (a , d))))) ⟩
-      inl (fst (g (fst (f (a , d)) , snd (f (a , d))))) ≡⟨ cong (inl ∘ fst) (g-f (a , d)) ⟩
-      inl a ∎
-    q =
-      snd (g (fst (f (a , d)) , st (st (snd (f (a , d)))))) ≡⟨ cong (snd ∘ g) (ΣPathP (refl , (st² _))) ⟩
-      snd (g (fst (f (a , d)) , snd (f (a , d)))) ≡⟨ cong snd (g-f (a , d)) ⟩
-      d ∎
-next-prev (inr b , d) = end≡ p q
-  where
-    p =
-      inr (fst (f (fst (g (b , d)) , st (st (snd (g (b , d))))))) ≡⟨ cong (inr ∘ fst ∘ f) (ΣPathP (refl , (st² _))) ⟩
-      inr (fst (f (fst (g (b , d)) , snd (g (b , d))))) ≡⟨ cong (inr ∘ fst) (f-g _) ⟩
-      inr b ∎
-    q =
-      snd (f (fst (g (b , d)) , st (st (snd (g (b , d)))))) ≡⟨ cong (snd ∘ f) (ΣPathP (refl , (st² _))) ⟩
-      snd (f (fst (g (b , d)) , snd (g (b , d)))) ≡⟨ cong snd (f-g _) ⟩
-      d ∎
-
-prev-next : (x : dArrows) → prev (next x) ≡ x
-prev-next (inl a , d) = end≡ (cong (inl ∘ fst) (g-f (a , st d))) (cong (st ∘ snd) (g-f (a , st d)) ∙ st² d)
-prev-next (inr b , d) = end≡ (cong (inr ∘ fst) (f-g (b , st d))) (cong (st ∘ snd) (f-g (b , st d)) ∙ st² d)
 
 cong-prev-next : {x y : dArrows} (p : x ≡ y) → PathP (λ i → prev-next x i ≡ prev-next y i) (cong prev (cong next p)) p
 cong-prev-next p = toPathP (Ends-isSet _ _ _ _)
@@ -186,15 +122,6 @@ next-op (inr b , d) = end≡ p q
 prev-op : (x : dArrows) → prev (op x) ≡ op (next x)
 prev-op (inl a , d) = refl
 prev-op (inr b , d) = refl
-
--- iterate
-iterate : ℤ → dArrows → dArrows
-iterate zero x = x
-iterate (suc n) x = next (iterate n x)
-iterate (predl n) x = prev (iterate n x)
-iterate (predr n) x = prev (iterate n x)
-iterate (predl-suc n i) x = prev-next (iterate n x) i
-iterate (suc-predr n i) x = next-prev (iterate n x) i
 
 abstract
   iterate-+ : (m n : ℤ) (e : dArrows) → iterate n (iterate m e) ≡ iterate (m ℤ.+ n) e
@@ -262,12 +189,6 @@ iterate-B-odd (is-inr b) (odd-predr p) = prev-B-switch (iterate-B-even (is-inr b
 --- Chains and direction
 ---
 
-reachable : dArrows → dArrows → Type ℓ
-reachable e e' = Σ ℤ (λ n → iterate n e ≡ e')
-
-is-reachable : dArrows → dArrows → Type ℓ
-is-reachable e e' = ∥ reachable e e' ∥
-
 reachable-is-reachable : (e e' : dArrows) → reachable e e' → is-reachable e e'
 reachable-is-reachable e e' r = ∣ r ∣
 
@@ -299,10 +220,24 @@ reachable→reachable-arr e@{a , tgt} {e'} (n , r) = ℤ.neg n , p
       arrow (iterate n e)                              ≡⟨ cong arrow r ⟩
       arrow e'                                         ∎
 
-reachable-arr→reachable : {a b : Arrows} → reachable-arr a b → reachable (fw a) (fw b) ⊎ reachable (fw a) (bw b)
-reachable-arr→reachable {a} {b} (n , r) with Ends.case≡ (end (iterate n (fw a)))
-... | inl p = inl (n , end≡ r p)
-... | inr p = inr (n , end≡ r p)
+abstract
+  reachable-arr→reachable : {a b : Arrows} → reachable-arr a b → reachable (fw a) (fw b) ⊎ reachable (fw a) (bw b)
+  reachable-arr→reachable {a} {b} (n , r) with Ends.case≡ (end (iterate n (fw a)))
+  ... | inl p = inl (n , end≡ r p)
+  ... | inr p = inr (n , end≡ r p)
+
+-- reachable→reachable-arr' : {a b : Arrows} → reachable (fw a) (fw b) ⊎ reachable (fw a) (bw b) → reachable-arr a b
+-- reachable→reachable-arr' (inl r) = reachable→reachable-arr r
+-- reachable→reachable-arr' (inr r) = reachable→reachable-arr r
+
+reachable-end : {a b : Arrows} → reachable-arr a b → End
+reachable-end {a} (n , r) = snd (iterate n (fw a))
+
+reachable-arr→reachable' : {a b : Arrows} (r : reachable-arr a b) → reachable (fw a) (orient b (reachable-end r))
+reachable-arr→reachable' (n , r) = n , ΣPathP (r , refl)
+
+reachable-arr-isSet : (a b : Arrows) → isSet (reachable-arr a b)
+reachable-arr-isSet a b = isSetΣ ℤ-isSet λ _ → isProp→isSet (Arrows-isSet _ _)
 
 is-reachable-arr : (a b : Arrows) → Type ℓ
 is-reachable-arr a b = ∥ reachable-arr a b ∥
@@ -506,27 +441,18 @@ unique-orientation {_} {e} {e'} r r' p =
         fromℕ l                                 ∎
   ... | inr et | inl e's = {!!} -- similar to previous case
 
--- the type of directed chains
--- NB: quotienting by the propositional truncation or the relation itself does not change anything...
-dChains : Type ℓ
-dChains = dArrows / λ a b → is-reachable a b
-
 dChains-isSet : isSet dChains
 dChains-isSet = squash/
-
--- elements of a directed chain
-delements : dChains → Type ℓ
-delements c = fiber [_] c
 
 delements-isSet : (c : dChains) → isSet (delements c)
 delements-isSet c = isSetΣ Ends-isSet λ _ → isProp→isSet (dChains-isSet _ _)
 
 abstract
-  delement-is-reachable-arr : {o : Ends} (a : delements [ o ]) → is-reachable o (fst a)
-  delement-is-reachable-arr {o} (a , r) = effective (λ _ _ → propTruncIsProp) is-reachable-is-equiv o a (sym r)
+  delement-is-reachable : {o : Ends} (a : delements [ o ]) → is-reachable o (fst a)
+  delement-is-reachable {o} (a , r) = effective (λ _ _ → propTruncIsProp) is-reachable-is-equiv o a (sym r)
 
-  delement-reachable-arr : {o : Ends} (a : delements [ o ]) → reachable o (fst a)
-  delement-reachable-arr a = reachable-reveal (delement-is-reachable-arr a)
+  delement-reachable : {o : Ends} (a : delements [ o ]) → reachable o (fst a)
+  delement-reachable a = reachable-reveal (delement-is-reachable a)
 
 delements-element : {c : dChains} (a : delements c) → delements [ fst a ] ≡ delements c
 delements-element a = cong delements (snd a)
@@ -534,7 +460,7 @@ delements-element a = cong delements (snd a)
 -- the type of all chains
 -- NB: quotienting by the propositional truncation or the relation itself does not change anything...
 Chains : Type ℓ
-Chains = Arrows / λ a b → is-reachable-arr a b
+Chains = Arrows / is-reachable-arr
 
 Chains-isSet : isSet Chains
 Chains-isSet = squash/
@@ -576,7 +502,7 @@ elements-element a = cong elements (snd a)
 element-end : {o : Arrows} (a : elements [ o ]) → Ends
 element-end {o} a = iterate (fst (element-reachable-arr a)) (fw o)
 
--- the end reached by an arrow is reachable-arr
+-- the end reached by an arrow is reachable
 element-end-reachable-arr : {a : Arrows} (e : elements [ a ]) → reachable (fw a) (element-end e)
 element-end-reachable-arr {a} e = fst (element-reachable-arr e) , refl
 
@@ -614,6 +540,10 @@ elements→delements {o} a = element-end a , p
   abstract
     p = sym (eq/ _ _ ∣ element-end-reachable-arr a ∣)
 
+-- -- directing an element preserves the underlying arrow
+-- elements→delements-arrow : {o : Arrows} (a : elements [ o ]) → arrow (fst (elements→delements a)) ≡ fst a
+-- elements→delements-arrow {o} a = {!!}
+
 -- This shows that we have a canonical orientation once we fix the fwing point
 delements≃elements : {o : Arrows} → delements [ fw o ] ≃ elements [ o ]
 delements≃elements {o} = isoToEquiv i
@@ -622,7 +552,7 @@ delements≃elements {o} = isoToEquiv i
   Iso.fun i = delements→elements
   Iso.inv i = elements→delements
   Iso.rightInv i a = ΣProp≡ (λ _ → Chains-isSet _ _) (arrow-element-end _)
-  Iso.leftInv i a = ΣProp≡ (λ _ → dChains-isSet _ _) (unique-orientation (element-end-reachable-arr (delements→elements a)) (delement-reachable-arr a) (arrow-element-end (delements→elements a)))
+  Iso.leftInv i a = ΣProp≡ (λ _ → dChains-isSet _ _) (unique-orientation (element-end-reachable-arr (delements→elements a)) (delement-reachable a) (arrow-element-end (delements→elements a)))
 
 canonical-orientation : {o : Arrows} → delements [ fw o ] ≡ elements [ o ]
 canonical-orientation {o} = ua delements≃elements
@@ -643,6 +573,12 @@ chainA c = Σ (elements c) (in-left ∘ fst)
 -- elements in B in the chain
 chainB : Chains → Type ℓ
 chainB c = Σ (elements c) (in-right ∘ fst)
+
+chainA→A : {c : Chains} → chainA c → A
+chainA→A a = get-left (snd a)
+
+chainB→B : {c : Chains} → chainB c → B
+chainB→B b = get-right (snd b)
 
 chainB-isSet : (c : Chains) → isSet (chainB c)
 chainB-isSet c = isSetΣ (elements-isSet c) λ _ → isProp→isSet (in-right-isProp _)

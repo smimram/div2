@@ -26,7 +26,7 @@ open import Cubical.HITs.SetQuotients as []
 
 open import Ends
 
-module Swapper {ℓ} {A B : Type ℓ} (SA : isSet A) (SB : isSet B) (isom : Iso (A × End) (B × End)) where
+module Swapper {ℓ} {A B : Type ℓ} (SA : isSet A) (SB : isSet B) (isom : A × End ≃ B × End) where
 
 open import Arrows SA SB isom
 open import Bracketing SA SB isom
@@ -38,8 +38,8 @@ open import Switch SA SB isom
 
 -- the swapping function
 swapper-dchain : {o : Ends} → delements [ o ] → delements [ o ]
-swapper-dchain ((inl a , d) , r) = next (inl a , d) , sym (eq/ _ _ (∥∥.map (λ { (n , r) → suc  n , cong next r }) (delement-is-reachable-arr ((inl a , d) , r))))
-swapper-dchain ((inr b , d) , r) = prev (inr b , d) , sym (eq/ _ _ (∥∥.map (λ { (n , r) → pred n , cong prev r }) (delement-is-reachable-arr ((inr b , d) , r))))
+swapper-dchain ((inl a , d) , r) = next (inl a , d) , sym (eq/ _ _ (∥∥.map (λ { (n , r) → suc  n , cong next r }) (delement-is-reachable ((inl a , d) , r))))
+swapper-dchain ((inr b , d) , r) = prev (inr b , d) , sym (eq/ _ _ (∥∥.map (λ { (n , r) → pred n , cong prev r }) (delement-is-reachable ((inr b , d) , r))))
 
 swapper-dchain-lr : {o : Ends} (a : delements [ o ]) → in-left (arrow (fst a)) → in-right (arrow (fst (swapper-dchain a)))
 swapper-dchain-lr _ (is-inl a) = is-inr _
@@ -61,7 +61,7 @@ dchainB c = Σ (delements c) (in-right ∘ fst ∘ fst)
 dchain-A≃B : dChains → Type ℓ
 dchain-A≃B c = dchainA c ≃ dchainB c
 
-swapper-dchain-iso : (o : Ends) → dchain-A≃B [ o ]
+swapper-dchain-iso : (o : dArrows) → dchain-A≃B [ o ]
 swapper-dchain-iso o = isoToEquiv i
   where
   i : Iso (dchainA [ o ]) (dchainB [ o ])
@@ -353,8 +353,8 @@ slope-swapper {c} = [].elim
     p =
       equiv' (transport (non-matched-op o) (n , m)) .fst                 ≡⟨ refl ⟩
       equiv' (ℤ.neg n , snd (transport (non-matched-op o) (n , m))) .fst ≡⟨ refl ⟩
-      swapper-chain-iso' (iterate-fw (ℤ.neg n) o) .fst                ≡⟨ cong (fst ∘ swapper-chain-iso') (iterate-fw-neg n o) ⟩
-      swapper-chain-iso' (iterate-fw n (op o)) .fst                   ≡⟨ refl ⟩
+      swapper-chain-iso' (iterate-fw (ℤ.neg n) o) .fst                   ≡⟨ cong (fst ∘ swapper-chain-iso') (iterate-fw-neg n o) ⟩
+      swapper-chain-iso' (iterate-fw n (op o)) .fst                      ≡⟨ refl ⟩
       equiv' (n , m) .fst                                                ∎
 
   equiv'-indepo : {o o' : Arrows} {d d' : End} (r : reachable (o , d) (o' , d')) (nm : non-matched (o' , d')) →

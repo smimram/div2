@@ -4,8 +4,11 @@ open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.Function
 open import Cubical.Foundations.Isomorphism
 open import Cubical.Foundations.Equiv
+open import Cubical.Foundations.Equiv.HalfAdjoint
 open import Cubical.Foundations.HLevels
 open import Cubical.Foundations.Univalence
+open import Cubical.Foundations.Transport
+open import Cubical.Foundations.GroupoidLaws
 open import Cubical.Relation.Nullary
 open import Cubical.Relation.Nullary.DecidableEq
 open import Cubical.Relation.Binary
@@ -23,7 +26,7 @@ open import Cubical.HITs.SetQuotients as []
 
 open import Ends
 
-module Div2 {ℓ} {A B : Type ℓ} (SA : isSet A) (SB : isSet B) (isom : Iso (A × End) (B × End)) where
+module Div2 {ℓ} {A B : Type ℓ} (SA : isSet A) (SB : isSet B) (isom : A × End ≃ B × End) where
 
 open import Arrows SA SB isom
 open import Bracketing SA SB isom
@@ -44,7 +47,7 @@ bij-by-chain : {ℓ ℓ' ℓ'' : Level} {A : Type ℓ} {B : Type ℓ'}
                ((x : (A ⊎ B) / R) → (Σ (fiber [_] x) (in-left ∘ fst)) ≃ (Σ (fiber [_] x) (in-right ∘ fst))) →
                A ≃ B
 bij-by-chain {A = A} {B = B} R b =
-  A ≃⟨ inl≃ ⟩
+  A                                                        ≃⟨ inl≃ ⟩
   Σ (A ⊎ B) in-left                                        ≃⟨ invEquiv (Σ-cong-equiv-fst (invEquiv (partition R))) ⟩
   Σ (Σ ((A ⊎ B) / R) (fiber [_])) (in-left ∘ fst ∘ snd)    ≃⟨ assocΣ ⟩
   Σ ((A ⊎ B) / R) (λ x → Σ (fiber [_] x) (in-left ∘ fst))  ≃⟨ congΣEquiv b ⟩
@@ -55,12 +58,13 @@ bij-by-chain {A = A} {B = B} R b =
 
 -- cong₂ Iso (sym (ua partition)) (sym (ua partition))
 
+Conway-chain : (c : Chains) → chain-A≃B c
+Conway-chain c with tricho c
+... | wb t = matching-equiv t
+... | sw t = swapper-chain (switched-element c t)
+... | sl t = slope-swapper t
+
 -- finally, the Conway isomorphism!
 Conway : A ≃ B
-Conway = bij-by-chain is-reachable-arr e
-  where
-  e : (c : Chains) → chain-A≃B c
-  e c with tricho c
-  ... | wb t = matching-equiv t
-  ... | sw t = swapper-chain (switched-element c t)
-  ... | sl t = slope-swapper t
+Conway = bij-by-chain is-reachable-arr Conway-chain
+

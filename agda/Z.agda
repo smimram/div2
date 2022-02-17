@@ -50,6 +50,17 @@ elim A z s p p' ps sp' (predr n) = p' n (elim A z s p p' ps sp' n)
 elim A z s p p' ps sp' (predl-suc n i) = ps n (elim A z s p p' ps sp' n) i
 elim A z s p p' ps sp' (suc-predr n i) = sp' n (elim A z s p p' ps sp' n) i
 
+-- same as above but with same function for the two predecessors (which is what
+-- we use in practice)
+elim' : ∀ {ℓ} (A : ℤ → Type ℓ)
+        (z : A zero)
+        (s : (n : ℤ) → A n → A (suc n))
+        (p : (n : ℤ) → A n → A (predl n))
+        (ps : (n : ℤ) → (x : A n) → PathP (λ i → A (predl-suc n i)) (p (suc n) (s n x)) x)
+        (sp' : (n : ℤ) → (x : A n) → PathP (λ i → A (suc-predr n i)) (s (predr n) (subst A (predl≡predr n) (p n x))) x)
+        (n : ℤ) → A n
+elim' A z s p ps sp' n = elim A z s p (λ n An → subst A (predl≡predr n) (p n An)) ps sp' n
+
 rec : ∀ {ℓ} {A : Type ℓ}
        (z : A)
        (s : ℤ → A → A)

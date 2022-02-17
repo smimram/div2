@@ -13,6 +13,7 @@ open import Cubical.Data.Sum
 open import Cubical.Data.Empty as ⊥
 open import Cubical.Data.Unit
 open import Cubical.HITs.PropositionalTruncation as ∥∥
+open import Cubical.HITs.SetTruncation as ∥∥₀
 open import Cubical.HITs.SetQuotients as []
 open import Cubical.Relation.Nullary
 open import Cubical.Relation.Binary
@@ -113,6 +114,40 @@ isPropΠ' h f g i {x} = h x (f {x}) (g {x}) i
 -- a variant of isPropΣ
 isPropΣ' : {ℓ ℓ' : Level} {A : Type ℓ} {B : A → Type ℓ'} → ((x : A) → isProp (B x)) → ((x y : A) → B x → B y → x ≡ y) → isProp (Σ A B)
 isPropΣ' prop eq (a , b) (a' , b') = ΣPathP ((eq _ _ b b') , (toPathP (prop _ _ _)))
+
+
+-- -- roughly isHAEquiv.com (snd (equiv→HAEquiv e)) a
+-- Equiv-com : {ℓ : Level} {A B : Type ℓ} (e : A ≃ B) (a : A) → cong (equivFun e) (secEq e a) ≡ retEq e (equivFun e a)
+-- Equiv-com e a = funExt⁻ (EquivJ (λ A e → cong (equivFun e) ∘ (secEq e) ≡ retEq e ∘ (equivFun e)) refl e) a
+
+--- This is in the book, chapter 4
+-- postulate
+  -- Equiv-com : {ℓ ℓ' : Level} {A : Type ℓ} {B : Type ℓ'} (e : A ≃ B) (a : A) → cong (equivFun e) (secEq e a) ≡ retEq e (equivFun e a)
+
+--- alternative more tractable definition to Σ-cong-equiv-fst (we have an
+--- explicit definition for the inverse)
+-- Σ-cong-equiv-fst' : {ℓ ℓ' ℓ'' : Level} {A : Type ℓ} {A' : Type ℓ'} {B : A' → Type ℓ''} (e : A ≃ A') → Σ A (B ∘ equivFun e) ≃ Σ A' B
+-- Σ-cong-equiv-fst' {_} {_} {_} {A} {A'} {B} e = isoToEquiv i
+  -- where
+  -- i : Iso (Σ A (B ∘ equivFun e)) (Σ A' B)
+  -- Iso.fun i (a , b) = equivFun e a , b
+  -- Iso.inv i (a , b) = invEq e a , subst B (sym (retEq e a)) b
+  -- Iso.rightInv i (a , b) = ΣPathP (retEq e a , toPathP lem)
+    -- where
+    -- lem =
+      -- subst B (retEq e a) (subst B (sym (retEq e a)) b) ≡⟨ sym (substComposite B (sym (retEq e a)) (retEq e a) b) ⟩
+      -- subst B (sym (retEq e a) ∙ retEq e a) b           ≡⟨ cong (λ p → subst B p b) (lCancel (retEq e a)) ⟩
+      -- subst B refl b                                    ≡⟨ substRefl {B = B} b ⟩
+      -- b                                                 ∎
+  -- Iso.leftInv i (a , b) = ΣPathP (secEq e a , (toPathP lem))
+    -- where
+    -- lem =
+      -- subst (B ∘ equivFun e) (secEq e a) (subst B (sym (retEq e (equivFun e a))) b)      ≡⟨ refl ⟩
+      -- subst B (cong (equivFun e) (secEq e a)) (subst B (sym (retEq e (equivFun e a))) b) ≡⟨ sym (substComposite B (sym (retEq e (equivFun e a))) (cong (equivFun e) (secEq e a)) b) ⟩
+      -- subst B (sym (retEq e (equivFun e a)) ∙ cong (equivFun e) (secEq e a)) b           ≡⟨ cong (λ p → subst B (sym (retEq e (equivFun e a)) ∙ p) b) ( Equiv-com e a) ⟩
+      -- subst B (sym (retEq e (equivFun e a)) ∙ retEq e (equivFun e a)) b                  ≡⟨ cong (λ p → subst B p b) (rCancel _) ⟩
+      -- subst B refl b                                                                     ≡⟨ substRefl {B = B} b ⟩
+      -- b                                                                                  ∎
 
 ---
 --- custom elimination principle
@@ -275,8 +310,6 @@ get-left (is-inl a) = a
 get-right : {x : A ⊎ B} → in-right x → B
 get-right (is-inr b) = b
 
--- NB: I am sure that there is an equivalence lying there, but I am too lazy
--- right now to think about it
 inl-get-left : {x : A ⊎ B} (l : in-left x) → inl (get-left l) ≡ x
 inl-get-left (is-inl a) = refl
 
@@ -288,8 +321,8 @@ inl≃ = isoToEquiv i
   where
   i : Iso A (Σ (A ⊎ B) in-left)
   Iso.fun i a = inl a , is-inl a
-  Iso.inv i (inl a , _) = a
-  Iso.rightInv i (inl a , _) = ΣProp≡ in-left-isProp refl
+  Iso.inv i (_ , l) = get-left l
+  Iso.rightInv i (_ , l) = ΣProp≡ in-left-isProp (inl-get-left l)
   Iso.leftInv i a = refl
 
 inr≃ : ∀ {ℓ ℓ'} {A : Type ℓ} {B : Type ℓ'} → B ≃ Σ (A ⊎ B) in-right
@@ -297,8 +330,8 @@ inr≃ = isoToEquiv i
   where
   i : Iso B (Σ (A ⊎ B) in-right)
   Iso.fun i b = inr b , is-inr b
-  Iso.inv i (inr b , _) = b
-  Iso.rightInv i (inr b , _) = ΣProp≡ in-right-isProp refl
+  Iso.inv i (_ , r) = get-right r
+  Iso.rightInv i (_ , r) = ΣProp≡ in-right-isProp (inr-get-right r)
   Iso.leftInv i b = refl
 
 ---

@@ -14,7 +14,7 @@ open import Cubical.HITs.SetQuotients as []
 open import Misc
 open import Ends
 
-module Tricho {ℓ} {A B : Type ℓ} (SA : isSet A) (SB : isSet B) (isom : Iso (A × End) (B × End)) where
+module Tricho {ℓ} {A B : Type ℓ} (SA : isSet A) (SB : isSet B) (isom : A × End ≃ B × End) where
 
 open import Arrows SA SB isom
 open import Bracketing SA SB isom
