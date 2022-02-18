@@ -493,4 +493,4 @@ slope-swapper {c} = [].elim
       -- we need to transport along nm = ∣ nm' |, which holds since these are propositions
       p' : (nm' : non-matched (fw o')) →
            subst chain-A≃B oo' (equiv (subst sequential-chain (sym oo') seq) (subst non-matched-chain (sym oo') nm)) .fst ≡ equiv seq nm .fst
-      p' nm' = {!cong (λ nm → subst chain-A≃B oo' (equiv (subst sequential-chain (sym oo') seq) (subst non-matched-chain (sym oo') nm)) .fst) ?!} ∙ p nm' ∙ {!!}
+      p' nm' = {!cong (λ nm → subst chain-A≃B oo' (equiv (subst sequential-chain (sym oo') seq) (subst non-matched-chain (sym oo') nm)) .fst) ?!} ∙ p nm' ∙ ?

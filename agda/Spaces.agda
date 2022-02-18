@@ -74,6 +74,14 @@ map₀ f p = cong (∥∥₀-map f) p
 
 -- fiberwise equivalence: an equivalence between the total space induces an
 -- equivalence between the fibers
+-- equiv-fib : {ℓ : Level} {A A' B : Type ℓ} →
+            -- (f : A → B) (e : A ≃ A') (b : B) → fiber f b ≃ fiber (f ∘ invEq e) b
+-- equiv-fib f e b = {!!}
+
+-- ∥∥₀-equiv-fib' : {ℓ : Level} {A : Type ℓ} {B : Type ℓ} →
+               -- (e : A ≃ B) (x : ∥ A ∥₀) → fiber ∣_∣₀ x ≃ fiber ∣_∣₀ (∥∥₀-map (equivFun e) x)
+-- ∥∥₀-equiv-fib' e x = compEquiv (equiv-fib ∣_∣₀ e x) {!!}
+
 ∥∥₀-equiv-fib : {ℓ : Level} {A : Type ℓ} {B : Type ℓ} →
                (e : A ≃ B) (x : ∥ A ∥₀) → fiber ∣_∣₀ x ≃ fiber ∣_∣₀ (∥∥₀-map (equivFun e) x)
 ∥∥₀-equiv-fib e x = isoToEquiv i
@@ -126,8 +134,9 @@ glueing-equiv' {A = A} {B = B} {P = P} {Q = Q} p f = isoToEquiv (Σ-ap-iso (equi
   Iso.rightInv i (inr b) = ∥∥₀.elim {B = λ b → F (G (inr b)) ≡ inr b} (λ _ → isProp→isSet (isSet⊎ setTruncIsSet setTruncIsSet _ _)) (λ _ → refl) b
   Iso.leftInv i x = ∥∥₀.elim {B = λ x → G (F x) ≡ x} (λ _ → isProp→isSet (setTruncIsSet _ _)) (λ { (inl a) → refl ; (inr b) → refl }) x
 
+-- set truncation commutes with taking subtypes
 ∥∥₀ΣP : {ℓ ℓ' : Level} {A : Type ℓ} (P : A → Type ℓ') (prop : (a : A) → isProp (P a)) → ∥ Σ A P ∥₀ ≃ Σ ∥ A ∥₀ (fst ∘ (∥∥₀.rec isSetHProp λ a → P a , prop a))
-∥∥₀ΣP {A = A} P prop = isoToEquiv {!!}
+∥∥₀ΣP {A = A} P prop = isoToEquiv i
   where
   P' : ∥ A ∥₀ → Type _
   P' = fst ∘ (∥∥₀.rec isSetHProp λ a → P a , prop a)
@@ -138,9 +147,10 @@ glueing-equiv' {A = A} {B = B} {P = P} {Q = Q} p f = isoToEquiv (Σ-ap-iso (equi
   i : Iso ∥ Σ A P ∥₀ (Σ ∥ A ∥₀ P')
   Iso.fun i = F
   Iso.inv i = G
-  Iso.rightInv i (a , p) = ΣProp≡ (λ a → ∥∥₀.elim {B = λ a → isProp (P' a)} (λ _ → isProp→isSet isPropIsProp) prop a) {!!}
-  Iso.leftInv i = {!!}
+  Iso.rightInv i (a , p) = ΣProp≡ (λ a → ∥∥₀.elim {B = λ a → isProp (P' a)} (λ _ → isProp→isSet isPropIsProp) prop a) (∥∥₀.elim {B = λ a → (p : P' a) → F (G (a , p)) .fst ≡ a} (λ _ → isProp→isSet (isPropΠ λ _ → setTruncIsSet _ _)) (λ a p → refl) a p)
+  Iso.leftInv i = ∥∥₀.elim (λ _ → isProp→isSet (setTruncIsSet _ _)) λ { (a , p) → refl}
 
+--
 -- import previous work on division by 2 on sets obtained by set truncation
 
 A₀isSet : isSet ∥ A ∥₀
@@ -290,7 +300,7 @@ iterate-suc₀ : (n : ℤ) (a : dArrows₀) → iterate₀ (suc n) a ≡ next₀
 iterate-suc₀ n a = sym (∥∥₀-map-comp next (iterate n) a)
 
 iterate-pred₀ : (n : ℤ) (a : dArrows₀) → iterate₀ (pred n) a ≡ prev₀ (iterate₀ n a)
-iterate-pred₀ n a = {!!}
+iterate-pred₀ n a = sym (∥∥₀-map-comp prev (iterate n) a)
 
 Arrows₀ = ∥ Arrows ∥₀
 
@@ -347,17 +357,33 @@ reachable≃f' {a} {b} (n , p) = ℤ.elim E Z N P P PN {!!} n a b p
 
 -- NB: the lemmas below do not seem to be specific to ∣_∣₀
 
--- fiber of a subtype
+-- the fiber of a subtype is the same as the original fiber
+-- Note: probably not the most elegant proof...
 fiber-sub : {ℓ : Level} {A : Type ℓ} (P : A → Type ℓ) → ((x : A) → isProp (P x)) →
             (x : ∥ Σ A P ∥₀) → fiber ∣_∣₀ x ≃ fiber ∣_∣₀ (∥∥₀-map fst x)
 fiber-sub {A = A} P prop x = isoToEquiv i
   where
   i : Iso (fiber ∣_∣₀ x) (fiber ∣_∣₀ (∥∥₀-map fst x))
   Iso.fun i ((a , p) , q) = a , cong (∥∥₀-map fst) q
-  Iso.inv i (a , q) = (a , {!∥∥₀.elim {B = {!!}} (λ _ → isProp→isSet (prop _)) {!!} x!}) , {!!}
+  Iso.inv i (a , q) = (a , subst P' a'≡a₀ P'a') , lem'
     where
-    lem : {!!}
-    lem = {!!}
+    P' : ∥ A ∥₀ → Type _
+    P' = fst ∘ ∥∥₀.rec isSetHProp (λ a → P a , prop a)
+    aPa : Σ ∥ A ∥₀ P'
+    aPa = equivFun (∥∥₀ΣP P prop) x
+    a' : ∥ A ∥₀
+    a' = fst aPa
+    P'a' : P' a'
+    P'a' = snd aPa
+    lem1 : (x : ∥ Σ A P ∥₀) → fst (equivFun (∥∥₀ΣP P prop) x) ≡ ∥∥₀-map fst x
+    lem1 x = ∥∥₀.elim {B = λ x → fst (equivFun (∥∥₀ΣP P prop) x) ≡ ∥∥₀-map fst x} (λ _ → isProp→isSet (setTruncIsSet _ _)) (λ { (a , p) → refl}) x
+    a'≡a₀ : a' ≡ ∣ a ∣₀
+    a'≡a₀ = lem1 x ∙ sym q
+    lem' =
+      ∣ a , subst P' a'≡a₀ P'a' ∣₀ ≡⟨ sym (secEq (∥∥₀ΣP P prop) ∣ a , subst P' a'≡a₀ P'a' ∣₀) ⟩
+      invEq (∥∥₀ΣP P prop) (equivFun (∥∥₀ΣP P prop) ∣ a , subst P' a'≡a₀ P'a' ∣₀) ≡⟨ cong (invEq (∥∥₀ΣP P prop)) (ΣPathP (sym a'≡a₀ , toPathP _)) ⟩
+      invEq (∥∥₀ΣP P prop) (equivFun (∥∥₀ΣP P prop) x) ≡⟨ secEq (∥∥₀ΣP P prop) x ⟩
+      x ∎
   Iso.rightInv i (a , q) = ΣProp≡ (λ _ → setTruncIsSet _ _) refl
   Iso.leftInv i ((a , p) , q) = ΣProp≡ (λ _ → setTruncIsSet _ _) (ΣProp≡ prop refl)
 
@@ -369,7 +395,11 @@ fiber-inl {B = B} a =
   fiber ∣_∣₀ (∥∥₀-map (inl {B = B}) a)           ■
 
 fiber-inr : {ℓ : Level} {A B : Type ℓ} (a : ∥ B ∥₀) → fiber ∣_∣₀ a ≃ fiber ∣_∣₀ (∥∥₀-map (inr {A = A}) a)
-fiber-inr {A = A} a = {!!}
+fiber-inr {A = A} a =
+  fiber ∣_∣₀ a                                  ≃⟨ ∥∥₀-equiv-fib (inr≃ {A = A}) a ⟩
+  fiber ∣_∣₀ (∥∥₀-map (equivFun inr≃) a)         ≃⟨ fiber-sub in-right in-right-isProp (∥∥₀-map (equivFun inr≃) a) ⟩
+  fiber ∣_∣₀ (∥∥₀-map fst (∥∥₀-map (fst inr≃) a)) ≃⟨ pathToEquiv (cong (fiber ∣_∣₀) (∥∥₀-map-comp fst (fst inr≃) a)) ⟩
+  fiber ∣_∣₀ (∥∥₀-map (inr {A = A}) a)           ■
 
 Div2 : A ≃ B
 Div2 = compEquiv (Σ-components A) (compEquiv (glueing-equiv' DS.Conway {!fiber-equiv!}) (invEquiv (Σ-components B)))
@@ -377,10 +407,10 @@ Div2 = compEquiv (Σ-components A) (compEquiv (glueing-equiv' DS.Conway {!fiber-
   fiber-equiv : (a : ∥ A ∥₀) → fiber ∣_∣₀ a ≃ fiber ∣_∣₀ (equivFun DS.Conway a)
   fiber-equiv a =
     fiber ∣_∣₀ a                                                                                    ≃⟨ fiber-inl a ⟩
-    fiber ∣_∣₀ (ArrowsS→0 (inl a))                                                                  ≃⟨ {!!} ⟩
-    el-cc (fw₀ (ArrowsS→0 (inl a)))                                                                 ≃⟨ {!!} ⟩
+    fiber ∣_∣₀ (ArrowsS→0 (inl a))                                                                  ≃⟨ {!!} ⟩ -- similar administrative step
+    el-cc (fw₀ (ArrowsS→0 (inl a)))                                                                 ≃⟨ {!!} ⟩ -- similar administrative step
     el-cc (dArrowsS→0 (AS.fw (inl a)))                                                              ≃⟨ reachable≃f' (reachableS→0 (AS.reachable-arr→reachable' (DRS.Conway-reachable a))) ⟩
-    el-cc (dArrowsS→0 (inr (DRS.ConwayFun a) , AS.reachable-end (DRS.Conway-reachable a)))          ≃⟨ {!!} ⟩
-    el-cc (orient₀ (ArrowsS→0 (inr (DRS.ConwayFun a))) (AS.reachable-end (DRS.Conway-reachable a))) ≃⟨ {!!} ⟩
+    el-cc (dArrowsS→0 (inr (DRS.ConwayFun a) , AS.reachable-end (DRS.Conway-reachable a)))          ≃⟨ {!!} ⟩ -- similar administrative step
+    el-cc (orient₀ (ArrowsS→0 (inr (DRS.ConwayFun a))) (AS.reachable-end (DRS.Conway-reachable a))) ≃⟨ {!!} ⟩ -- similar administrative step
     fiber ∣_∣₀ (ArrowsS→0 (inr (DRS.ConwayFun a)))                                                  ≃⟨ invEquiv (fiber-inr _) ⟩
     fiber ∣_∣₀ (equivFun DS.Conway a)                                                               ■

@@ -43,6 +43,10 @@ open import Cubical.Relation.Binary
 -- image : ∀ {ℓ ℓ'} {A : Type ℓ} {B : Type ℓ'} (f : A → B) → Type (ℓ-max ℓ ℓ')
 -- image {B = B} f = Σ B (λ b → ∥ fiber f b ∥)
 
+toSingl : {ℓ : Level} {A : Type ℓ} (a : A) → singl a
+toSingl a = a , refl
+
+
 -- non-dependent version of cong₂, sometimes help with inference of metavariables
 cong₂-nd : {ℓ ℓ' ℓ'' : Level} {A : Type ℓ} {B : Type ℓ'} {C : Type ℓ''}
         (f : A → B → C)

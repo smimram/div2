@@ -95,7 +95,7 @@ sl-reachable {c} slc = [].elim
   {B = λ c → (slc : slope-chain c) → reachable-chain-A≃B (slope-swapper {c} slc)}
   (λ _ → isSetΠ λ _ → isSetΠ λ _ → reachable-arr-isSet _ _)
   reachable'
-  {!!} -- independence of the origin
+  ? -- independence of the origin
   c slc
   where
   reachable' : (o : Arrows) (slc : slope-chain [ o ]) → (a : chainA [ o ]) → reachable-arr (inl (chainA→A a)) (inr (chainB→B (equivFun (slope-swapper slc) a)))

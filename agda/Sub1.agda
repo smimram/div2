@@ -17,9 +17,6 @@ private
   variable
     ℓ ℓ' : Level
 
-toSingl : {A : Type ℓ} (a : A) → singl a
-toSingl a = a , refl
-
 ---
 --- Predecessor
 ---

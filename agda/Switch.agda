@@ -196,7 +196,6 @@ switched-element c = [].elim
          transport (λ i → Arrows) (fst (el a (subst switched-chain (sym (eq/ a b r)) sw))) ≡⟨ transportRefl _ ⟩
          el a (subst switched-chain (sym (eq/ a b r)) sw) . fst ≡⟨ refl ⟩
          arrow (iterate (fst (subst switched-chain (sym (eq/ a b r)) sw)) (fw a)) ≡⟨ {!!} ⟩
-
          arrow (iterate (fst sw) (fw b)) ≡⟨ refl ⟩
          el b sw .fst ∎
  
@@ -225,16 +224,57 @@ sequential-op a = ua (isoToEquiv i)
   Iso.leftInv i s = sequential-isProp _ _ _
 
 ¬switched⇒sequential : (a : Arrows) → ¬ (switched a) → sequential (fw a)
-¬switched⇒sequential a ¬sw m n ¬m ¬n with end (iterate m (fw a)) | end (iterate n (fw a)) | m ℤ.≟ n
-... | u | v | w = {!!}
+¬switched⇒sequential a ¬sw m n ¬m ¬n with toSingl (end (iterate m (fw a))) | toSingl (end (iterate n (fw a))) | m ℤ.≟ n
+... | src , x | src , y | w = x ∙ sym y
+... | src , x | tgt , y | lt w = ⊥.rec {!!}
+... | src , x | tgt , y | eq w = ⊥.rec (subst fib (sym ((sym x) ∙ cong (λ k → snd (iterate k (a , src))) w ∙ y)) tt)
+  where
+    fib : End → Type₀
+    fib src = ⊥ 
+    fib tgt = ⊤
+... | src , x | tgt , y | gt w = ⊥.rec {!!}
+... | tgt , x | src , y | lt w = ⊥.rec {!!}
+... | tgt , x | src , y | eq w = ⊥.rec (subst fib ((sym x) ∙ cong (λ k → snd (iterate k (a , src))) w ∙ y) tt)
+  where
+    fib : End → Type₀
+    fib src = ⊥ 
+    fib tgt = ⊤
+... | tgt , x | src , y | gt w = ⊥.rec {!!}
+... | tgt , x | tgt , y | w = x ∙ sym y
+
 
 sequential-chain-hP : Chains → hProp ℓ-zero
 sequential-chain-hP c = [].elim (λ _ → isSetHProp) (λ a → sequential (fw a) , sequential-isProp _) indep c
   where
   abstract
     indep : (a b : Arrows) (r : is-reachable-arr a b) → (sequential (fw a) , sequential-isProp (fw a)) ≡ (sequential (fw b) , sequential-isProp (fw b))
-    indep a b r = ΣProp≡ (λ _ → isPropIsProp) {!!} -- TODO
-
+    indep a b r = ΣProp≡ (λ _ → isPropIsProp) (ua (isoToEquiv i)) -- TODO
+      where
+        i : Iso (sequential (fw a)) (sequential (fw b))
+        i = iso h k sec ret
+          where
+          h : sequential (fw a) → sequential (fw b)
+          h seqa m n ¬m ¬n = {!!} --vu que sequential (le type but)
+          --est une prop on peut éliminer r pour obtenir un entier j pour lequel iterate j (fw a) = b.
+          --par subst on peut donc se ramener à prouver
+          --end (iterate m (iterate j (fw a))) ≡ end (iterate n (iterate j (fw a)))
+          --et donc
+          -- end (iterate m + j (fw a)) ≡ end (iterate n + j (fw a)))
+          -- car iterate est une action.
+          -- mais seqa (m + j) (n + j) ? ? fournit une preuve de ce fait.
+          -- il reste à prouver les deux ?  qui correspondent à ¬ matched (arrow (iterate (n + j) (fw a)))
+          -- et ¬ matched (arrow (iterate (m + j) (fw a))) mais :
+          -- ¬ matched (arrow (iterate (m + j) (fw a)) = ¬ matched (arrow (iterate m (fw b)))
+          -- et ¬ matched (arrow (iterate (n + j) (fw a)) = ¬ matched (arrow (iterate n (fw b)))
+          -- encore parce que iterate j (fw a) = b
+          -- donc ¬n et ¬m fournissent les preuves voulues
+          k : sequential (fw b) → sequential (fw a)
+          k seqb m n ¬m ¬n = {!!} --idem 
+          sec : section h k
+          sec = {!!}  --sequential est une prop donc trivial
+          ret : retract h k
+          ret = {!!} --sequential est une prop donc trivial
+          
 sequential-chain : Chains → Type₀
 sequential-chain c = fst (sequential-chain-hP c)
 
@@ -299,7 +339,25 @@ non-matched-chain-hP c = [].elim (λ _ → isSetHProp) (λ a → is-non-matched 
   where
   abstract
     indep : (a b : Arrows) (r : is-reachable-arr a b) → (is-non-matched (fw a) , is-non-matched-isProp (fw a)) ≡ (is-non-matched (fw b) , is-non-matched-isProp (fw b))
-    indep a b r = ΣProp≡ (λ _ → isPropIsProp) {!!}
+    indep a b r = ΣProp≡ (λ _ → isPropIsProp) (ua (isoToEquiv i))
+      where
+      i : Iso (is-non-matched (fw a)) (is-non-matched (fw b))
+      i = iso h k sec ret
+        where
+        h : is-non-matched (fw a) → is-non-matched (fw b)
+        h ¬a = ∣ {!!} , {!!} ∣ -- le type but
+        --est une prop on peut éliminer r pour obtenir un entier j pour lequel iterate j (fw b) = a.
+        --on peut également eliminer ¬a pour la même raison. on a donc un entier i tel que
+        --¬ matched (arrow (iterate i (fw a)))  
+        --par subst on obtient une preuve de ¬ matched (arrow (iterate i (iterate j (fw b)))
+        --donc de ¬ matched (arrow (iterate (i+j) (fw b)) car iterate est une action
+        --ainsi on met (i + j) dans le premier trou et la preuve obtenue plus tot dans le second
+        k : is-non-matched (fw b) → is-non-matched (fw a)
+        k ¬b = ∣ {!!} , {!!} ∣ --idem 
+        sec : section h k
+        sec = {!!}  --is-non-matched est une prop donc trivial
+        ret : retract h k
+        ret = {!!} --is-non-matched est une prop donc trivial
 
 non-matched-chain : (c : Chains) → Type₀
 non-matched-chain c = fst (non-matched-chain-hP c)
