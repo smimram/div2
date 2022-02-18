@@ -248,32 +248,31 @@ sequential-chain-hP c = [].elim (λ _ → isSetHProp) (λ a → sequential (fw a
   where
   abstract
     indep : (a b : Arrows) (r : is-reachable-arr a b) → (sequential (fw a) , sequential-isProp (fw a)) ≡ (sequential (fw b) , sequential-isProp (fw b))
-    indep a b r = ΣProp≡ (λ _ → isPropIsProp) (ua (isoToEquiv i)) -- TODO
+    indep a b r = ΣProp≡ (λ _ → isPropIsProp) (ua (isoToEquiv i))
       where
         i : Iso (sequential (fw a)) (sequential (fw b))
         i = iso h k sec ret
           where
           h : sequential (fw a) → sequential (fw b)
-          h seqa m n ¬m ¬n = {!!} --vu que sequential (le type but)
-          --est une prop on peut éliminer r pour obtenir un entier j pour lequel iterate j (fw a) = b.
-          --par subst on peut donc se ramener à prouver
+          h seqa m n ¬m ¬n = {!!} --sequential (the goal type)
+          --is a proposition so we can eliminate r to obtain an integer j for which iterate j (fw a) = b.
+          --by subst it is then sufficient to prove
           --end (iterate m (iterate j (fw a))) ≡ end (iterate n (iterate j (fw a)))
-          --et donc
-          -- end (iterate m + j (fw a)) ≡ end (iterate n + j (fw a)))
-          -- car iterate est une action.
-          -- mais seqa (m + j) (n + j) ? ? fournit une preuve de ce fait.
-          -- il reste à prouver les deux ?  qui correspondent à ¬ matched (arrow (iterate (n + j) (fw a)))
-          -- et ¬ matched (arrow (iterate (m + j) (fw a))) mais :
+          --and so end (iterate m + j (fw a)) ≡ end (iterate n + j (fw a)))
+          --because iterate is an action
+          --but seqa (m + j) (n + j) ? ? give us a proof of that latter fact.
+          --it remain to show the two ? which correspond to ¬ matched (arrow (iterate (n + j) (fw a)))
+          -- and ¬ matched (arrow (iterate (m + j) (fw a))) but :
           -- ¬ matched (arrow (iterate (m + j) (fw a)) = ¬ matched (arrow (iterate m (fw b)))
-          -- et ¬ matched (arrow (iterate (n + j) (fw a)) = ¬ matched (arrow (iterate n (fw b)))
-          -- encore parce que iterate j (fw a) = b
-          -- donc ¬n et ¬m fournissent les preuves voulues
+          -- and ¬ matched (arrow (iterate (n + j) (fw a)) = ¬ matched (arrow (iterate n (fw b)))
+          -- again because iterate j (fw a) = b
+          -- so ¬n and ¬m give us the wanted proofs
           k : sequential (fw b) → sequential (fw a)
-          k seqb m n ¬m ¬n = {!!} --idem 
+          k seqb m n ¬m ¬n = {!!} --same as above 
           sec : section h k
-          sec = {!!}  --sequential est une prop donc trivial
+          sec = {!!}  --sequential is a prop so trivial
           ret : retract h k
-          ret = {!!} --sequential est une prop donc trivial
+          ret = {!!} --sequential is a prop so trivial
           
 sequential-chain : Chains → Type₀
 sequential-chain c = fst (sequential-chain-hP c)
@@ -345,19 +344,19 @@ non-matched-chain-hP c = [].elim (λ _ → isSetHProp) (λ a → is-non-matched 
       i = iso h k sec ret
         where
         h : is-non-matched (fw a) → is-non-matched (fw b)
-        h ¬a = ∣ {!!} , {!!} ∣ -- le type but
-        --est une prop on peut éliminer r pour obtenir un entier j pour lequel iterate j (fw b) = a.
-        --on peut également eliminer ¬a pour la même raison. on a donc un entier i tel que
+        h ¬a = ∣ {!!} , {!!} ∣ -- the goal type
+        --is a proposition so we can eliminate r to obtain an integer j for which iterate j (fw b) = a.
+        --we can also eliminate ¬a for the same reason. we get then an integer i such that
         --¬ matched (arrow (iterate i (fw a)))  
-        --par subst on obtient une preuve de ¬ matched (arrow (iterate i (iterate j (fw b)))
-        --donc de ¬ matched (arrow (iterate (i+j) (fw b)) car iterate est une action
-        --ainsi on met (i + j) dans le premier trou et la preuve obtenue plus tot dans le second
+        --by subst we obtain a proof of ¬ matched (arrow (iterate i (iterate j (fw b)))
+        --hence a proof of ¬ matched (arrow (iterate (i+j) (fw b)) because iterate is an action
+        --so we can fill the first hole with (i + j) and the second one with with the proof we obtained.
         k : is-non-matched (fw b) → is-non-matched (fw a)
-        k ¬b = ∣ {!!} , {!!} ∣ --idem 
+        k ¬b = ∣ {!!} , {!!} ∣ --same as above
         sec : section h k
-        sec = {!!}  --is-non-matched est une prop donc trivial
+        sec = {!!}  --is-non-matched is a prop so trivial
         ret : retract h k
-        ret = {!!} --is-non-matched est une prop donc trivial
+        ret = {!!} --is-non-matched is a prop so trivial
 
 non-matched-chain : (c : Chains) → Type₀
 non-matched-chain c = fst (non-matched-chain-hP c)

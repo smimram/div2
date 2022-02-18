@@ -419,7 +419,16 @@ unique-orientation {_} {e} {e'} r r' p =
   unique-end : {e e' : Ends} (l : ℕ) (r : reachable e e') → fst r ≡ fromℕ l → arrow e ≡ arrow e' → e ≡ e'
   unique-end {e} {e'} zero r lr p = reachable-zero r lr
   -- impossible because of parity
-  unique-end {e} {e'} (suc zero) (n , r) lr p = {!!}
+  unique-end {e} {e'} (suc zero) (n , r) lr p = ⊥.rec (subst fib eq! tt)
+    where
+    fib : A ⊎ B → Type₀
+    fib (inl x) = ⊤
+    fib (inr x) = ⊥
+    eq! : inl {!!} ≡ inr {!!}
+    eq! = {!(subst (λ k → (iterate k e ≡ e')) lr r)!}-- in the hole we have a proof of (next e ≡ e')
+    --we need to match on e e' to decide if they belong to A or B. if both belong to A or to B, then (next e ≡ e') will raise
+    --a contradiction (because we will have inl a ≡ inr b for some a and b). Same if e belong to A and e' to B or the contrary,
+    --p of type arrow e ≡ arrow e' will bring a contradiction in giving us an element of type inl a ≡ inr b.
   -- let's shorten the loop
   unique-end {e} {e'} (suc (suc l)) r lr p with Ends.case≡ (end e) | Ends.case≡ (end e')
   ... | inl es | inl e's = end≡ p (es ∙ sym e's)

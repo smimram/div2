@@ -282,7 +282,7 @@ dArrowsS→0 : AS.dArrows → dArrows₀
 dArrowsS→0 = equivFun dArrowsS₀
 
 reachableS→0 : {a b : AS.dArrows} → AS.reachable a b → reachable₀ (dArrowsS→0 a) (dArrowsS→0 b)
-reachableS→0 (n , r) = n , {!!}
+reachableS→0 {a = a} (n , r) = n , {!!} ∙ cong dArrowsS→0 r
 
 prev₀ : dArrows₀ → dArrows₀
 prev₀ = ∥∥₀-map prev
