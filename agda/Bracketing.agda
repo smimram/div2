@@ -152,7 +152,7 @@ match-closing {a} m@(suc n , z , ¬z) with ℤ.discrete (height (suc n) (fw a)) 
     -- if the end is src then the height cannot go from non-zero to zero
     lem : end (next (iterate (fromℕ n) (fw a))) ≡ tgt
     lem with Ends.case≡ (end (next (iterate (fromℕ n) (fw a))))
-    ... | inl pe = ⊥.elim {!!}
+    ... | inl pe = ⊥.rec {!!}
     ... | inr pe = pe
 
 -- matching is a symmetric relation

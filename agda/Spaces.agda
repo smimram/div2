@@ -402,7 +402,7 @@ fiber-inr {A = A} a =
   fiber ∣_∣₀ (∥∥₀-map (inr {A = A}) a)           ■
 
 Div2 : A ≃ B
-Div2 = compEquiv (Σ-components A) (compEquiv (glueing-equiv' DS.Conway {!fiber-equiv!}) (invEquiv (Σ-components B)))
+Div2 = compEquiv (Σ-components A) (compEquiv (glueing-equiv' DS.Conway fiber-equiv) (invEquiv (Σ-components B)))
   where
   fiber-equiv : (a : ∥ A ∥₀) → fiber ∣_∣₀ a ≃ fiber ∣_∣₀ (equivFun DS.Conway a)
   fiber-equiv a =

@@ -83,7 +83,7 @@ sw-reachable {c} swc = [].elim
       chainB→B (equivFun (swapper-chain-iso' se) (a , l)) ≡⟨ refl ⟩
       chainB→B ((subst chainB (sym (element-chain se)) ∘ fst (swapper-chain-iso (fst se)) ∘ subst chainA (element-chain se)) (a , l)) ≡⟨ {!!} ⟩
       {!!} ∎
-    b≡' : chainB→B (equivFun (swapper-chain se) (a , l)) ≡ {!!}
+    b≡' : chainB→B (equivFun (swapper-chain se) (a , l)) ≡ ?
     b≡' = {!!}
     b≡ : inr (chainB→B (equivFun (swapper-chain se) (a , l))) ≡ fst (fst (swapper-dchain (elements→delements se)))
     b≡ = {!!}

@@ -226,20 +226,22 @@ sequential-op a = ua (isoToEquiv i)
 ¬switched⇒sequential : (a : Arrows) → ¬ (switched a) → sequential (fw a)
 ¬switched⇒sequential a ¬sw m n ¬m ¬n with toSingl (end (iterate m (fw a))) | toSingl (end (iterate n (fw a))) | m ℤ.≟ n
 ... | src , x | src , y | w = x ∙ sym y
-... | src , x | tgt , y | lt w = ⊥.rec {!!}
+... | src , x | tgt , y | lt w = ⊥.rec {!!}--impossible case because either iterate m (a , src) or iterate n (a , src) will
+--be matched, but we have a proof that they are not, namely ¬m and ¬n
 ... | src , x | tgt , y | eq w = ⊥.rec (subst fib (sym ((sym x) ∙ cong (λ k → snd (iterate k (a , src))) w ∙ y)) tt)
   where
     fib : End → Type₀
     fib src = ⊥ 
     fib tgt = ⊤
-... | src , x | tgt , y | gt w = ⊥.rec {!!}
-... | tgt , x | src , y | lt w = ⊥.rec {!!}
+... | src , x | tgt , y | gt w = ⊥.rec {!!}-- impossible case because then either iterate m (a , src) or iterate n (a , src) will
+--be switch, but ¬sw is a proof that there is no switch arrow on the chain so we get a contradiction.
+... | tgt , x | src , y | lt w = ⊥.rec {!!} --same as above (hole 3)
 ... | tgt , x | src , y | eq w = ⊥.rec (subst fib ((sym x) ∙ cong (λ k → snd (iterate k (a , src))) w ∙ y) tt)
   where
     fib : End → Type₀
     fib src = ⊥ 
     fib tgt = ⊤
-... | tgt , x | src , y | gt w = ⊥.rec {!!}
+... | tgt , x | src , y | gt w = ⊥.rec {!!}--same as above (hole 4)
 ... | tgt , x | tgt , y | w = x ∙ sym y
 
 
