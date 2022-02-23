@@ -13,7 +13,9 @@ implies
 
 > `A ≃ B`
 
-where `2` is a type with two elements (e.g. the booleans).
+where `A` and `B` are arbitrary types and `2` is a type with two elements
+(e.g. the booleans).
 
 The proof is based on the explanation of given in Doyle and Conway's _[Division
-by three](https://arxiv.org/abs/math/0605779)_.
+by three](https://arxiv.org/abs/math/0605779)_, and you can [nicely read the
+Agda code here](https://smimram.github.io/div2/).
