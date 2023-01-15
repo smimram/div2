@@ -15,7 +15,7 @@ open import Cubical.Data.Sum
 open import Cubical.Data.Sigma
 open import Z as ℤ hiding (_<_ ; _≤_ ; _≟_)
 open import Cubical.Data.Nat as ℕ
-open import Cubical.Data.Nat.Order as ℕ
+open import Cubical.Data.Nat.Order as ℕ hiding (_>_)
 open import Nat as ℕ
 open import Misc
 open import Cubical.HITs.PropositionalTruncation as ∥∥
@@ -31,15 +31,15 @@ open import Arrows SA SB isom
 --- Well-bracketed chains
 ---
 
-opening : ℤ'
+opening : ℤ
 opening = ℤ.one
 
-closing : ℤ'
+closing : ℤ
 closing = ℤ.neg ℤ.one
 
 -- Weight of an arrow, contrarily to Conway's paper, the convention is: → is
 -- opening and ← is closing
-weight : dArrows → ℤ'
+weight : dArrows → ℤ
 weight (_ , src) = opening
 weight (_ , tgt) = closing
 
@@ -57,7 +57,7 @@ weight-op (x , src) = refl
 weight-op (x , tgt) = refl
 
 -- number of opening and closing brackets within the next n arrows
-height : (n : ℕ) → dArrows → ℤ'
+height : (n : ℕ) → dArrows → ℤ
 height ℕ.zero  x = ℤ.zero
 height (suc n) x = height n x ℤ.+ weight (iterate (fromℕ n) x)
 
@@ -225,7 +225,7 @@ well-bracketed-dchain c = fst T
   wb : Ends → hProp ℓ-zero
   wb a = well-bracketed-end a , well-bracketed-end-isProp a
   T : hProp ℓ-zero
-  T = [].elim (λ _ → isSetHProp) wb (λ a b r → ΣProp≡ (λ _ → isPropIsProp) (well-bracketed-end-indep a b (reachable-reveal r))) c
+  T = [].elim (λ _ → isSetHProp) wb (λ a b r → Σ≡Prop (λ _ → isPropIsProp) (well-bracketed-end-indep a b (reachable-reveal r))) c
 
 -- being well-bracketed is independent of the direction
 well-bracketed-end-op : (a : Ends) → well-bracketed-end (op a) ≡ well-bracketed-end a
@@ -264,7 +264,7 @@ well-bracketed-chain-hProp : (c : Chains) → hProp ℓ-zero
 well-bracketed-chain-hProp c = [].elim (λ _ → isSetHProp) (λ a → well-bracketed a , well-bracketed-isProp a) indep c
   where
   abstract
-    indep = (λ a b r → ΣProp≡ (λ _ → isPropIsProp) (well-bracketed-indep a b (reachable-arr-reveal r)))
+    indep = (λ a b r → Σ≡Prop (λ _ → isPropIsProp) (well-bracketed-indep a b (reachable-arr-reveal r)))
 
 -- the chain of an arrow is well-bracketed
 well-bracketed-chain : (c : Chains) → Type₀
@@ -305,36 +305,36 @@ wb-reachable-arr-matched wb r = ∥∥.elim (λ _ → matched-isProp _) (λ r �
 
 matching-equiv : {c : Chains} → well-bracketed-chain c → chain-A≃B c
 matching-equiv {c} = [].elim
-  {B = λ c → well-bracketed-chain c → chain-A≃B c }
+  {P = λ c → well-bracketed-chain c → chain-A≃B c}
   (λ o → isSetΠ (λ _ → chain-A≃B-isSet _))
   e
   (λ a b r → e-indep r)
   c
   where
   i : {a : Arrows} → well-bracketed a → Iso (chainA [ a ]) (chainB [ a ])
-  Iso.fun (i wb) (b , l) = (match m , sym (eq/ _ _ ∣ match-reachable-arr m ∣) ∙ snd b) , match-lr m l
+  Iso.fun (i wb) (b , l) = (match m , sym (eq/ _ _ ∣ match-reachable-arr m ∣₁) ∙ snd b) , match-lr m l
     where
     m : matched (fst b)
     m = wb-reachable-arr-matched wb (element-is-reachable-arr b)
-  Iso.inv (i wb) (b , r) = (match m , sym (eq/ _ _ ∣ match-reachable-arr m ∣) ∙ snd b) , match-rl m r
+  Iso.inv (i wb) (b , r) = (match m , sym (eq/ _ _ ∣ match-reachable-arr m ∣₁) ∙ snd b) , match-rl m r
     where
     m = wb-reachable-arr-matched wb (element-is-reachable-arr b)
-  Iso.rightInv (i wb) (b , r) = ΣProp≡ (λ _ → in-right-isProp _) (ΣProp≡ (λ _ → Chains-isSet _ _) lem)
+  Iso.rightInv (i wb) (b , r) = Σ≡Prop (λ _ → in-right-isProp _) (Σ≡Prop (λ _ → Chains-isSet _ _) lem)
     where
     m = wb-reachable-arr-matched wb (element-is-reachable-arr b)
     -- this is essentially match² m
     lem =
-      match (wb-reachable-arr-matched wb (element-is-reachable-arr (match m , (sym (eq/ _ _ ∣ match-reachable-arr m ∣) ∙ snd b)))) ≡⟨ cong match (matched-isProp (match m) (wb-reachable-arr-matched wb (element-is-reachable-arr (match m , (sym (eq/ _ _ ∣ match-reachable-arr m ∣) ∙ snd b)))) (matched-sym m)) ⟩
+      match (wb-reachable-arr-matched wb (element-is-reachable-arr (match m , (sym (eq/ _ _ ∣ match-reachable-arr m ∣₁) ∙ snd b)))) ≡⟨ cong match (matched-isProp (match m) (wb-reachable-arr-matched wb (element-is-reachable-arr (match m , (sym (eq/ _ _ ∣ match-reachable-arr m ∣₁) ∙ snd b)))) (matched-sym m)) ⟩
       match (matched-sym m) ≡⟨ match² m ⟩
       fst b ∎
-  Iso.leftInv (i wb) (b , l) = ΣProp≡ (λ _ → in-left-isProp _) (ΣProp≡ (λ _ → Chains-isSet _ _) lem)
+  Iso.leftInv (i wb) (b , l) = Σ≡Prop (λ _ → in-left-isProp _) (Σ≡Prop (λ _ → Chains-isSet _ _) lem)
     where
     m = wb-reachable-arr-matched wb (element-is-reachable-arr b)
-    lem = cong match (matched-isProp (match m) (wb-reachable-arr-matched wb (element-is-reachable-arr (match m , sym (eq/ _ _ ∣ match-reachable-arr m ∣) ∙ snd b))) (matched-sym m)) ∙ match² m
+    lem = cong match (matched-isProp (match m) (wb-reachable-arr-matched wb (element-is-reachable-arr (match m , sym (eq/ _ _ ∣ match-reachable-arr m ∣₁) ∙ snd b))) (matched-sym m)) ∙ match² m
   e : (a : Arrows) → well-bracketed-chain [ a ] → chain-A≃B [ a ]
   e a wb = isoToEquiv (i wb)
   e-indep : {a b : Arrows} (r : is-reachable-arr a b) → PathP (λ i → cong (λ c → well-bracketed-chain c → chain-A≃B c) (eq/ a b r) i) (e a) (e b)
-  e-indep {a} {b} r = toPathP (funExt (λ wb → equivEq _ _ (funExt λ { (x , l) → ΣProp≡ (λ _ → in-right-isProp _) (ΣProp≡ (λ _ → Chains-isSet _ _) (lem r wb x l)) })))
+  e-indep {a} {b} r = toPathP (funExt (λ wb → equivEq (funExt λ { (x , l) → Σ≡Prop (λ _ → in-right-isProp _) (Σ≡Prop (λ _ → Chains-isSet _ _) (lem r wb x l)) })))
     where
     -- matching is independent of starting point
     match-indep : {a b c : Arrows} (r : is-reachable-arr a b) (wb' : well-bracketed a) (r' : is-reachable-arr a c) (wb'' : well-bracketed b) (r'' : is-reachable-arr b c) → match (wb-reachable-arr-matched wb' r') ≡ match (wb-reachable-arr-matched wb'' r'')

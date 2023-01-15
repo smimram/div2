@@ -9,7 +9,6 @@ open import Cubical.Foundations.Univalence
 open import Cubical.Foundations.Transport
 open import Cubical.Foundations.GroupoidLaws
 open import Cubical.Relation.Nullary
-open import Cubical.Relation.Nullary.DecidableEq
 open import Cubical.Relation.Binary
 open import Cubical.Data.Empty as ⊥
 open import Cubical.Data.Unit renaming (Unit to ⊤)
@@ -48,8 +47,8 @@ swapper-dchain-rl : {o : Ends} (a : delements [ o ]) → in-right (arrow (fst a)
 swapper-dchain-rl _ (is-inr b) = is-inl _
 
 swapper-dchain² : {o : Ends} (a : delements [ o ]) → swapper-dchain (swapper-dchain a) ≡ a
-swapper-dchain² ((inl a , d) , r) = ΣProp≡ (λ _ → dChains-isSet _ _) (prev-next (inl a , d))
-swapper-dchain² ((inr b , d) , r) = ΣProp≡ (λ _ → dChains-isSet _ _) (next-prev (inr b , d))
+swapper-dchain² ((inl a , d) , r) = Σ≡Prop (λ _ → dChains-isSet _ _) (prev-next (inl a , d))
+swapper-dchain² ((inr b , d) , r) = Σ≡Prop (λ _ → dChains-isSet _ _) (next-prev (inr b , d))
 
 dchainA : dChains → Type ℓ
 dchainA c = Σ (delements c) (in-left ∘ fst ∘ fst)
@@ -67,13 +66,13 @@ swapper-dchain-iso o = isoToEquiv i
   i : Iso (dchainA [ o ]) (dchainB [ o ])
   Iso.fun i (a , l) = swapper-dchain a , swapper-dchain-lr a l
   Iso.inv i (b , r) = swapper-dchain b , swapper-dchain-rl b r
-  Iso.rightInv i (b , r) = ΣProp≡ (λ _ → in-right-isProp _) (swapper-dchain² b)
-  Iso.leftInv i (a , l) = ΣProp≡ (λ _ → in-left-isProp _) (swapper-dchain² a)
+  Iso.rightInv i (b , r) = Σ≡Prop (λ _ → in-right-isProp _) (swapper-dchain² b)
+  Iso.leftInv i (a , l) = Σ≡Prop (λ _ → in-left-isProp _) (swapper-dchain² a)
 
 swapper-dchain-indep : {o o' : Ends} (r : is-reachable o o') → PathP (λ i → cong (λ c → delements c → delements c) (eq/ o o' r) i) (swapper-dchain {o = o}) (swapper-dchain {o = o'})
 swapper-dchain-indep {o} {o'} r = toPathP (funExt λ {
-  ((inl a , d) , r) → ΣProp≡ (λ _ → dChains-isSet _ _) (p a d) ;
-  ((inr b , d) , r) → ΣProp≡ (λ _ → dChains-isSet _ _) (q b d)
+  ((inl a , d) , r) → Σ≡Prop (λ _ → dChains-isSet _ _) (p a d) ;
+  ((inr b , d) , r) → Σ≡Prop (λ _ → dChains-isSet _ _) (q b d)
   })
   where
     p = λ (a : A) (d : End) →
@@ -95,11 +94,11 @@ abstract
   swapper-dchain-indep'' {o} {o'} r = sym (fromPathP (funTypeTransp delements delements (eq/ o o' r) swapper-dchain)) ∙ swapper-dchain-indep' r
 
   swapper-dchain-iso-indep : {o o' : Ends} (r : is-reachable o o') → PathP (λ i → cong dchain-A≃B (eq/ o o' r) i) (swapper-dchain-iso o) (swapper-dchain-iso o')
-  swapper-dchain-iso-indep r = toPathP (equivEq _ _ (funExt λ { (a , l ) → ΣProp≡ (λ _ → in-right-isProp _) (funExt⁻ (fromPathP (swapper-dchain-indep r)) a) }))
+  swapper-dchain-iso-indep r = toPathP (equivEq (funExt λ { (a , l ) → Σ≡Prop (λ _ → in-right-isProp _) (funExt⁻ (fromPathP (swapper-dchain-indep r)) a) }))
 
   -- variant of the above
   swapper-dchain-iso-indep' : {o o' : Ends} (r : is-reachable o o') → transport (cong dchain-A≃B (eq/ o o' r)) (swapper-dchain-iso o) ≡ (swapper-dchain-iso o')
-  swapper-dchain-iso-indep' r = equivEq _ _ (funExt λ { (a , l ) → ΣProp≡ (λ _ → in-right-isProp _) (funExt⁻ (fromPathP (swapper-dchain-indep r)) a) })
+  swapper-dchain-iso-indep' r = equivEq (funExt λ { (a , l ) → Σ≡Prop (λ _ → in-right-isProp _) (funExt⁻ (fromPathP (swapper-dchain-indep r)) a) })
 
   -- another variant of the above
   swapper-dchain-iso-fst-indep'' : {o o' : Ends} (r : is-reachable o o') → subst dchainB (eq/ o o' r) ∘ fst (swapper-dchain-iso o) ∘ subst dchainA (sym (eq/ o o' r)) ≡ fst (swapper-dchain-iso o')
@@ -177,9 +176,9 @@ swapper-chain-iso-fst o =
   dchain→chainB ∘ fst (swapper-dchain-iso (fw o)) ∘ chain→dchainA ∎
     where
     p : Σfun delements→elements (λ {b} r → r) ≡ dchain→chainB
-    p = funExt λ { (_ , is-inr b) → ΣProp≡ (λ _ → in-right-isProp _) refl }
+    p = funExt λ { (_ , is-inr b) → Σ≡Prop (λ _ → in-right-isProp _) refl }
     q : Σfun elements→delements (λ {a} l → element-end-is-left a l) ≡ chain→dchainA
-    q = funExt λ { (_ , is-inl a) → ΣProp≡ (λ _ → in-left-isProp _) refl }
+    q = funExt λ { (_ , is-inl a) → Σ≡Prop (λ _ → in-left-isProp _) refl }
 
 -- TODO: we need the swapper hypothesis (and use the above lemma) and the corresponding lemma on dchains
 swapper-chain-iso-fst-indep : {o o' : Arrows} (r : is-reachable (fw o) (fw o')) →
@@ -190,7 +189,7 @@ swapper-chain-iso-fst-indep {o} {o'} r = toPathP p
     r' = is-reachable→is-reachable-arr r
     -- close to substCommSlice ?
     exB : subst chainB (eq/ o o' r') ∘ dchain→chainB ≡ dchain→chainB ∘ subst dchainB (eq/ (fw o) (fw o') r)
-    exB = funExt (λ b → ΣProp≡ (λ _ → in-right-isProp _) (ΣProp≡ (λ _ → Chains-isSet _ _) {!!}))
+    exB = funExt (λ b → Σ≡Prop (λ _ → in-right-isProp _) (Σ≡Prop (λ _ → Chains-isSet _ _) {!!}))
       where
       p = λ (b : dchainB [ fw o ]) →
         (subst chainB (eq/ o o' r') ∘ dchain→chainB) b .fst .fst ≡⟨ {!!} ⟩
@@ -216,7 +215,7 @@ swapper-chain-iso'-fst : {o : Arrows} (x : elements [ o ]) → fst (swapper-chai
 swapper-chain-iso'-fst x = refl
 
 swapper-chain-iso'-indep : {o : Arrows} {a b : elements [ o ]} → is-reachable (fw (fst a)) (fw (fst b)) → swapper-chain-iso' a ≡ swapper-chain-iso' b
-swapper-chain-iso'-indep {o} {a} {b} r = equivEq _ _ p
+swapper-chain-iso'-indep {o} {a} {b} r = equivEq p
   where
   r' : is-reachable-arr (fst a) (fst b)
   r' = is-reachable→is-reachable-arr r
@@ -239,7 +238,7 @@ swapper-chain-iso'-indep {o} {a} {b} r = equivEq _ _ p
     swapper-chain-iso' b .fst ∎
 
 swapper-chain-iso'-indepo : {o o' : Arrows} (p : [ o ] ≡ [ o' ]) (a : elements [ o ]) → subst chain-A≃B p (swapper-chain-iso' a) ≡ swapper-chain-iso' (subst elements p a)
-swapper-chain-iso'-indepo {o} {o'} p a = equivEq _ _ lem
+swapper-chain-iso'-indepo {o} {o'} p a = equivEq lem
   where
   a' : elements [ o' ]
   a' = subst elements p a
@@ -263,10 +262,10 @@ swapper-chain-iso'-indepo {o} {o'} p a = equivEq _ _ lem
 
 -- another variant
 swapper-chain : {c : Chains} → elements c → chain-A≃B c
-swapper-chain {c} = [].elim {B = λ c → elements c → chain-A≃B c} (λ _ → isSetΠ λ _ → chain-A≃B-isSet _) (λ _ → swapper-chain-iso') (λ o o' r → indep r) c
+swapper-chain {c} = [].elim {P = λ c → elements c → chain-A≃B c} (λ _ → isSetΠ λ _ → chain-A≃B-isSet _) (λ _ → swapper-chain-iso') (λ o o' r → indep r) c
   where
   indep' : {o o' : Arrows} (r : is-reachable-arr o o') → transport (λ i → elements (eq/ _ _ r i) → chain-A≃B (eq/ _ _ r i)) swapper-chain-iso' ≡ swapper-chain-iso'
-  indep' {o} {o'} r = funExt (λ x → equivEq _ _ (p x))
+  indep' {o} {o'} r = funExt (λ x → equivEq (p x))
     where
     p = λ (x : elements [ o' ]) →
       let oo' : [ o ] ≡ [ o' ]
@@ -303,8 +302,8 @@ slope-swapper {c} = [].elim
 
   -- reindex the nth iteration from o according to (fw o)
   iterate-fw : ℤ → (o : Ends) → elements [ fst o ]
-  iterate-fw n (o , src) = arrow (iterate n (fw o)) , sym (eq/ _ _ ∣ n , refl ∣)
-  iterate-fw n (o , tgt) = arrow (iterate (ℤ.neg n) (fw o)) , sym (eq/ _ _ ∣ ℤ.neg n , refl ∣)
+  iterate-fw n (o , src) = arrow (iterate n (fw o)) , sym (eq/ _ _ ∣ n , refl ∣₁)
+  iterate-fw n (o , tgt) = arrow (iterate (ℤ.neg n) (fw o)) , sym (eq/ _ _ ∣ ℤ.neg n , refl ∣₁)
 
   iterate-fw-neg : (n : ℤ) (o : Ends) → iterate-fw (ℤ.neg n) o ≡ iterate-fw n (op o)
   iterate-fw-neg n (o , src) = refl
@@ -325,9 +324,9 @@ slope-swapper {c} = [].elim
   equiv' : {o : Ends} → non-matched o → chain-A≃B [ fst o ]
   equiv' {o} (n , nm) = swapper-chain-iso' (iterate-fw n o)
   equiv'-indep : {o : Ends} (seq : sequential o) (nm nm' : non-matched o) → equiv' nm ≡ equiv' nm'
-  equiv'-indep {o} seq (n , ¬m) (n' , ¬m') = equivEq _ _ (
+  equiv'-indep {o} seq (n , ¬m) (n' , ¬m') = equivEq (
     equiv' (n , ¬m) .fst ≡⟨ refl ⟩
-    fst (swapper-chain-iso' xa) ≡⟨ cong fst (swapper-chain-iso'-indep ∣ iterate-fw-reachable-arr-fw n n' rsxy ∣) ⟩
+    fst (swapper-chain-iso' xa) ≡⟨ cong fst (swapper-chain-iso'-indep ∣ iterate-fw-reachable-arr-fw n n' rsxy ∣₁) ⟩
     
     fst (swapper-chain-iso' ya) ≡⟨ refl ⟩
     equiv' (n' , ¬m') .fst ∎)
@@ -348,7 +347,7 @@ slope-swapper {c} = [].elim
 
   -- equiv' does not depend on the orientation of the origin
   equiv'-indep-op : {o : Ends} (nm : non-matched (op o)) → equiv' {o = o} (transport (non-matched-op _) nm) ≡ equiv' {o = op o} nm
-  equiv'-indep-op {o} (n , m) = equivEq _ _ p
+  equiv'-indep-op {o} (n , m) = equivEq p
     where
     p =
       equiv' (transport (non-matched-op o) (n , m)) .fst                 ≡⟨ refl ⟩
@@ -358,8 +357,8 @@ slope-swapper {c} = [].elim
       equiv' (n , m) .fst                                                ∎
 
   equiv'-indepo : {o o' : Arrows} {d d' : End} (r : reachable (o , d) (o' , d')) (nm : non-matched (o' , d')) →
-                  subst chain-A≃B (sym (eq/ _ _ ∣ reachable→reachable-arr r ∣)) (equiv' nm) ≡ equiv' (non-matched-indep r nm)
-  equiv'-indepo {o} {o'} {d} {d'} r nm = equivEq _ _ p
+                  subst chain-A≃B (sym (eq/ _ _ ∣ reachable→reachable-arr r ∣₁)) (equiv' nm) ≡ equiv' (non-matched-indep r nm)
+  equiv'-indepo {o} {o'} {d} {d'} r nm = equivEq p
     where
     o→ : Ends
     o→ = o , d
@@ -370,7 +369,7 @@ slope-swapper {c} = [].elim
     m : ¬ (matched (arrow (iterate n o'→)))
     m = snd nm
     o'o : [ o' ] ≡ [ o ]
-    o'o = sym (eq/ o o' ∣ reachable→reachable-arr r ∣)
+    o'o = sym (eq/ o o' ∣ reachable→reachable-arr r ∣₁)
     a : elements [ o ]
     a = iterate-fw (fst r ℤ.+ n) o→
     a' : elements [ o' ]
@@ -385,7 +384,7 @@ slope-swapper {c} = [].elim
       equiv' (non-matched-indep {a = o→} {b = o'→} r nm) .fst                   ∎
         where
         so'oa' : subst elements o'o a' ≡ a
-        so'oa' = ΣProp≡ (λ _ → Chains-isSet _ _) (
+        so'oa' = Σ≡Prop (λ _ → Chains-isSet _ _) (
           subst elements o'o a' .fst ≡⟨ refl ⟩
           transport (λ _ → Arrows) (fst (iterate-fw n (o' , d'))) ≡⟨ transportRefl _ ⟩
           fst (iterate-fw n (o' , d'))                            ≡⟨ cong (fst ∘ iterate-fw n) (sym (snd r)) ⟩
@@ -423,10 +422,10 @@ slope-swapper {c} = [].elim
   -- small variant/generalization of the above
   equiv'-indepo' : {o o' : Ends} {oo' : [ fst o ] ≡ [ fst o' ]} (r : reachable o o') (nm : non-matched o') →
                    subst chain-A≃B oo' (equiv' (non-matched-indep r nm)) ≡ equiv' nm
-  equiv'-indepo' {o} {o'} {oo'} r nm = equivEq _ _ p
+  equiv'-indepo' {o} {o'} {oo'} r nm = equivEq p
     where
     o'o : [ arrow o' ] ≡ [ arrow o ]
-    o'o = eq/ _ _ ∣ reachable→reachable-arr (reachable-sym r) ∣
+    o'o = eq/ _ _ ∣ reachable→reachable-arr (reachable-sym r) ∣₁
     p =
       subst chain-A≃B oo' (equiv' (non-matched-indep r nm)) .fst                     ≡⟨ cong (λ oo' → subst chain-A≃B oo' (equiv' (non-matched-indep r nm)) .fst) (Chains-isSet _ _ _ _) ⟩
       subst chain-A≃B (sym o'o) (equiv' (non-matched-indep r nm)) .fst               ≡⟨ cong fst (equiv'-indepo (reachable-sym r) (non-matched-indep r nm)) ⟩
@@ -457,7 +456,7 @@ slope-swapper {c} = [].elim
       nm
       where
       p : (nm : non-matched (fw o')) →
-          subst chain-A≃B oo' (equiv (subst sequential-chain (sym oo') seq) (subst non-matched-chain (sym oo') ∣ nm ∣)) .fst ≡ equiv seq ∣ nm ∣ .fst
+          subst chain-A≃B oo' (equiv (subst sequential-chain (sym oo') seq) (subst non-matched-chain (sym oo') ∣ nm ∣₁)) .fst ≡ equiv seq ∣ nm ∣₁ .fst
       -- p nm with reachable-arr→reachable (reachable-arr-reveal r)
       -- ... | inl r' = ?
       -- ... | inr r' = ?
@@ -465,7 +464,7 @@ slope-swapper {c} = [].elim
         let seq' : sequential-chain [ o ]
             seq' = subst sequential-chain (sym oo') seq
             nm' : non-matched-chain [ o ]
-            nm' = subst non-matched-chain (sym oo') ∣ nm ∣
+            nm' = subst non-matched-chain (sym oo') ∣ nm ∣₁
         in
         --- NB: we need to to case here because pattern matching makes agda loop
         case reachable-arr→reachable (reachable-arr-reveal r) of λ {
@@ -473,22 +472,22 @@ slope-swapper {c} = [].elim
             let nmo : non-matched (fw o)
                 nmo = non-matched-indep r' nm
             in
-            subst chain-A≃B oo' (equiv seq' nm') .fst     ≡⟨ cong (fst ∘ subst chain-A≃B oo' ∘ equiv seq') (non-matched-chain-isProp [ o ] nm' ∣ nmo ∣) ⟩
-            subst chain-A≃B oo' (equiv seq' ∣ nmo ∣) .fst ≡⟨ refl ⟩
+            subst chain-A≃B oo' (equiv seq' nm') .fst     ≡⟨ cong (fst ∘ subst chain-A≃B oo' ∘ equiv seq') (non-matched-chain-isProp [ o ] nm' ∣ nmo ∣₁) ⟩
+            subst chain-A≃B oo' (equiv seq' ∣ nmo ∣₁) .fst ≡⟨ refl ⟩
             subst chain-A≃B oo' (equiv' nmo) .fst         ≡⟨ cong fst (equiv'-indepo' r' nm) ⟩
             equiv' nm .fst                                ≡⟨ refl ⟩
-            equiv seq ∣ nm ∣ .fst                         ∎
+            equiv seq ∣ nm ∣₁ .fst                         ∎
             ;
           (inr r') →
             let nmo : non-matched (fw o)
                 nmo = non-matched-indep r' (transport (non-matched-op _) nm)
             in
-            subst chain-A≃B oo' (equiv seq' nm') .fst     ≡⟨ cong (fst ∘ subst chain-A≃B oo' ∘ equiv seq') (non-matched-chain-isProp [ o ] nm' ∣ nmo ∣) ⟩
-            subst chain-A≃B oo' (equiv seq' ∣ nmo ∣) .fst ≡⟨ refl ⟩
+            subst chain-A≃B oo' (equiv seq' nm') .fst     ≡⟨ cong (fst ∘ subst chain-A≃B oo' ∘ equiv seq') (non-matched-chain-isProp [ o ] nm' ∣ nmo ∣₁) ⟩
+            subst chain-A≃B oo' (equiv seq' ∣ nmo ∣₁) .fst ≡⟨ refl ⟩
             subst chain-A≃B oo' (equiv' nmo ) .fst        ≡⟨ cong fst (equiv'-indepo' r' (transport (non-matched-op _) nm)) ⟩
             equiv' (transport (non-matched-op _) nm) .fst ≡⟨ cong fst (equiv'-indep-op nm) ⟩
             equiv' nm .fst                                ≡⟨ refl ⟩
-            equiv seq ∣ nm ∣ .fst                         ∎
+            equiv seq ∣ nm ∣₁ .fst                        ∎
           }
       -- we need to transport along nm = ∣ nm' |, which holds since these are propositions
       p' : (nm' : non-matched (fw o')) →
