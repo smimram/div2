@@ -124,7 +124,7 @@ prev-op (inl a , d) = refl
 prev-op (inr b , d) = refl
 
 abstract
-  iterate-+ : (m n : ℤ') (e : dArrows) → iterate n (iterate m e) ≡ iterate (m ℤ.+ n) e
+  iterate-+ : (m n : ℤ) (e : dArrows) → iterate n (iterate m e) ≡ iterate (m ℤ.+ n) e
   iterate-+ m n e = ℤ.elim
     (λ n → iterate n (iterate m e) ≡ iterate (m ℤ.+ n) e)
     (cong (λ m → iterate m e) (sym (ℤ.+-zero m)))
@@ -135,7 +135,7 @@ abstract
     (λ n p → toPathP (Ends-isSet _ _ _ _))
     n
 
-iterate-op : (n : ℤ') (e : dArrows) → iterate n (op e) ≡ op (iterate (ℤ.neg n) e)
+iterate-op : (n : ℤ) (e : dArrows) → iterate n (op e) ≡ op (iterate (ℤ.neg n) e)
 iterate-op n e = ℤ.elim
   (λ n → iterate n (op e) ≡ op (iterate (ℤ.neg n) e))
   refl
@@ -146,10 +146,10 @@ iterate-op n e = ℤ.elim
   (λ n p → toPathP (Ends-isSet _ _ _ _))
   n
 
-iterate-neg : (n : ℤ') (e : dArrows) → iterate (ℤ.neg n) e ≡ op (iterate n (op e))
+iterate-neg : (n : ℤ) (e : dArrows) → iterate (ℤ.neg n) e ≡ op (iterate n (op e))
 iterate-neg n e = sym (op-op _) ∙ cong op (sym (iterate-op n e))
 
-iterate-neg-op : (n : ℤ') (e : dArrows) → iterate (ℤ.neg n) (op e) ≡ op (iterate n e)
+iterate-neg-op : (n : ℤ) (e : dArrows) → iterate (ℤ.neg n) (op e) ≡ op (iterate n e)
 iterate-neg-op n e = iterate-neg n (op e) ∙ cong (op ∘ (iterate n)) (op-op e)
 
 -- parity
@@ -166,10 +166,10 @@ prev-A-switch (is-inl x) = is-inr _
 prev-B-switch : {x : dArrows} → in-right (arrow x) → in-left (arrow (prev x))
 prev-B-switch (is-inr x) = is-inl _
 
-iterate-A-even : {x : dArrows} → in-left (arrow x)  → {n : ℤ'} → ℤ.is-even n → in-left  (arrow (iterate n x))
-iterate-A-odd  : {x : dArrows} → in-left (arrow x)  → {n : ℤ'} → ℤ.is-odd  n → in-right (arrow (iterate n x))
-iterate-B-even : {x : dArrows} → in-right (arrow x) → {n : ℤ'} → ℤ.is-even n → in-right (arrow (iterate n x))
-iterate-B-odd  : {x : dArrows} → in-right (arrow x) → {n : ℤ'} → ℤ.is-odd  n → in-left  (arrow (iterate n x))
+iterate-A-even : {x : dArrows} → in-left (arrow x)  → {n : ℤ} → ℤ.is-even n → in-left  (arrow (iterate n x))
+iterate-A-odd  : {x : dArrows} → in-left (arrow x)  → {n : ℤ} → ℤ.is-odd  n → in-right (arrow (iterate n x))
+iterate-B-even : {x : dArrows} → in-right (arrow x) → {n : ℤ} → ℤ.is-even n → in-right (arrow (iterate n x))
+iterate-B-odd  : {x : dArrows} → in-right (arrow x) → {n : ℤ} → ℤ.is-odd  n → in-left  (arrow (iterate n x))
 iterate-A-even (is-inl x) even-zero = is-inl x
 iterate-A-even (is-inl x) (even-suc p) = next-B-switch (iterate-A-odd (is-inl x) p)
 iterate-A-even (is-inl x) (even-predl p) = prev-B-switch (iterate-A-odd (is-inl x) p)
@@ -195,7 +195,7 @@ reachable-is-reachable e e' r = ∣ r ∣₁
 -- reachability
 -- note that this is not a proposition, so that we often have to truncate
 reachable-arr : Arrows → Arrows → Type ℓ
-reachable-arr a b = Σ ℤ' (λ n → arrow (iterate n (fw a)) ≡ b)
+reachable-arr a b = Σ ℤ (λ n → arrow (iterate n (fw a)) ≡ b)
 
 reachable-op : {e e' : dArrows} → reachable (op e') (op e) → reachable e e'
 reachable-op {e} {e'} (n , r)  = n , (
@@ -357,8 +357,8 @@ abstract
   -- because ℤ is searchable)
   -- NB: we need both A to be a set and discrete
   reachable-arr-reveal : {a b : Arrows} → is-reachable-arr a b → reachable-arr a b
-  reachable-arr-reveal {a} {b} r = transport (Σ-cong-fst (ua (invEquiv ℤ'≃ℕ)))
-      (ℕ.find _ (λ _ → Arrows-isSet _ _) (λ n → Arrows-discrete _ _) (transport (cong ∥_∥₁ (Σ-ap (ua ℤ'≃ℕ) (λ n → cong (λ n → arrow (iterate n (fw a)) ≡ b) (sym (funExt⁻ (lem ℤ'≃ℕ) n))))) r))
+  reachable-arr-reveal {a} {b} r = transport (Σ-cong-fst (ua (invEquiv ℤ≃ℕ)))
+      (ℕ.find _ (λ _ → Arrows-isSet _ _) (λ n → Arrows-discrete _ _) (transport (cong ∥_∥₁ (Σ-ap (ua ℤ≃ℕ) (λ n → cong (λ n → arrow (iterate n (fw a)) ≡ b) (sym (funExt⁻ (lem ℤ≃ℕ) n))))) r))
     where
     lem : {ℓ : Level} {A : Type ℓ} {B : Type ℓ} (e : A ≃ B) → transport (ua (invEquiv e)) ∘ transport (ua e) ≡ idfun A
     lem {_} {A} {B} e =
@@ -371,8 +371,8 @@ abstract
 
   -- same as above (plus we can test the ends...)
   reachable-reveal : {a b : dArrows} → is-reachable a b → reachable a b
-  reachable-reveal {a} {b} r = transport (Σ-cong-fst (ua (invEquiv ℤ'≃ℕ)))
-       (ℕ.find _ (λ _ → Ends-isSet _ _) (λ n → Ends-discrete _ _) (transport (cong ∥_∥₁ (Σ-ap (ua ℤ'≃ℕ) (λ n → cong (λ n → iterate n a ≡ b) (sym (funExt⁻ (lem ℤ'≃ℕ) n))))) r))
+  reachable-reveal {a} {b} r = transport (Σ-cong-fst (ua (invEquiv ℤ≃ℕ)))
+       (ℕ.find _ (λ _ → Ends-isSet _ _) (λ n → Ends-discrete _ _) (transport (cong ∥_∥₁ (Σ-ap (ua ℤ≃ℕ) (λ n → cong (λ n → iterate n a ≡ b) (sym (funExt⁻ (lem ℤ≃ℕ) n))))) r))
     where
     lem : {ℓ : Level} {A : Type ℓ} {B : Type ℓ} (e : A ≃ B) → transport (ua (invEquiv e)) ∘ transport (ua e) ≡ idfun A
     lem {_} {A} {B} e =

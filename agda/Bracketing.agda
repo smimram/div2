@@ -7,7 +7,6 @@ open import Cubical.Foundations.Equiv
 open import Cubical.Foundations.HLevels
 open import Cubical.Foundations.Univalence
 open import Cubical.Relation.Nullary
-open import Cubical.Relation.Nullary.DecidableEq
 open import Cubical.Relation.Binary
 open BinaryRelation using (isEquivRel)
 open import Cubical.Data.Empty as ⊥
@@ -32,15 +31,15 @@ open import Arrows SA SB isom
 --- Well-bracketed chains
 ---
 
-opening : ℤ
+opening : ℤ'
 opening = ℤ.one
 
-closing : ℤ
+closing : ℤ'
 closing = ℤ.neg ℤ.one
 
 -- Weight of an arrow, contrarily to Conway's paper, the convention is: → is
 -- opening and ← is closing
-weight : dArrows → ℤ
+weight : dArrows → ℤ'
 weight (_ , src) = opening
 weight (_ , tgt) = closing
 
@@ -58,7 +57,7 @@ weight-op (x , src) = refl
 weight-op (x , tgt) = refl
 
 -- number of opening and closing brackets within the next n arrows
-height : (n : ℕ) → dArrows → ℤ
+height : (n : ℕ) → dArrows → ℤ'
 height ℕ.zero  x = ℤ.zero
 height (suc n) x = height n x ℤ.+ weight (iterate (fromℕ n) x)
 
