@@ -10,7 +10,6 @@ open import Cubical.Foundations.Univalence
 open import Cubical.Foundations.Transport
 open import Cubical.Foundations.GroupoidLaws
 open import Cubical.Relation.Nullary
-open import Cubical.Relation.Nullary.DecidableEq
 open import Cubical.Relation.Binary
 open import Cubical.Data.Empty as ⊥
 open import Cubical.Data.Unit renaming (Unit to ⊤)

@@ -24,10 +24,10 @@ g : B × End → A × End
 g = invEq isom
 
 g-f : (x : A × End) → g (f x) ≡ x
-g-f = secEq isom
+g-f = retEq isom
 
 f-g : (x : B × End) → f (g x) ≡ x
-f-g = retEq isom
+f-g = secEq isom
 
 Arrows : Type ℓ
 Arrows = A ⊎ B
@@ -92,7 +92,7 @@ next≃ = isoToEquiv i
   Iso.leftInv i = prev-next
 
 -- iterate
-iterate : ℤ → dArrows → dArrows
+iterate : ℤ' → dArrows → dArrows
 iterate zero x = x
 iterate (suc n) x = next (iterate n x)
 iterate (predl n) x = prev (iterate n x)
@@ -105,10 +105,10 @@ iterate (suc-predr n i) x = next-prev (iterate n x) i
 ---
 
 reachable : dArrows → dArrows → Type ℓ
-reachable e e' = Σ ℤ (λ n → iterate n e ≡ e')
+reachable e e' = Σ ℤ' (λ n → iterate n e ≡ e')
 
 is-reachable : dArrows → dArrows → Type ℓ
-is-reachable e e' = ∥ reachable e e' ∥
+is-reachable e e' = ∥ reachable e e' ∥₁
 
 ---
 --- Chains

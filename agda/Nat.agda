@@ -55,7 +55,7 @@ open import Cubical.Induction.WellFounded
 open import Cubical.HITs.PropositionalTruncation as ∥∥
 
 -- if there exists a natural number, we can find it!
-find : {ℓ : Level} (P : ℕ → Type ℓ) → ((n : ℕ) → isProp (P n)) → ((n : ℕ) → Dec (P n)) → ∥ Σ ℕ P ∥ → Σ ℕ P
+find : {ℓ : Level} (P : ℕ → Type ℓ) → ((n : ℕ) → isProp (P n)) → ((n : ℕ) → Dec (P n)) → ∥ Σ ℕ P ∥₁ → Σ ℕ P
 find P prop dec ex = fst first , fst (snd first)
   where
   isFirst : ℕ → Type _
@@ -63,7 +63,7 @@ find P prop dec ex = fst first , fst (snd first)
   isFirst-unique : {m n : ℕ} → isFirst m → isFirst n → m ≡ n
   isFirst-unique fm fn = ≤-antisym (snd fm _ (fst fn)) (snd fn _ (fst fm))
   isFirst-isProp : (n : ℕ) → isProp (isFirst n)
-  isFirst-isProp n = isProp× (prop n) (isPropΠ (λ m → isPropΠ λ _ → m≤n-isProp))
+  isFirst-isProp n = isProp× (prop n) (isPropΠ (λ m → isPropΠ λ _ → isProp≤))
   isPropΣ' : {ℓ ℓ' : Level} {A : Type ℓ} {B : A → Type ℓ'} → ((x : A) → isProp (B x)) → ((x y : A) → B x → B y → x ≡ y) → isProp (Σ A B)
   isPropΣ' p e (a , b) (a' , b') = ΣPathP ((e _ _ b b') , (toPathP (p _ _ _)))
   first-isProp : isProp (Σ ℕ isFirst)

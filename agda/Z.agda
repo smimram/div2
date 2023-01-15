@@ -8,41 +8,23 @@ open import Cubical.Data.Nat as ℕ using (ℕ)
 open import Cubical.Data.Nat.Order as ℕ using ()
 open import Cubical.Data.Sigma
 open import Cubical.Relation.Nullary
-open import Cubical.Relation.Nullary.DecidableEq
+-- TODO: use addition, negation and subtraction from the standard library
+open import Cubical.Data.Int.MoreInts.BiInvInt renaming (BiInvℤ to ℤ') hiding (_+_ ; +-assoc ; +-comm ; +-zero ; +-suc ; +-pred ; neg ; _-_) public
 
-data ℤ : Type₀  where
-  zero  : ℤ
-  suc   : ℤ → ℤ
-  predl : ℤ → ℤ
-  predr : ℤ → ℤ
-  predl-suc : (z : ℤ) → predl (suc z) ≡ z
-  suc-predr : (z : ℤ) → suc (predr z) ≡ z
-
-pred = predl
-pred-suc = predl-suc
-
-one : ℤ
+one : ℤ'
 one = suc zero
 
--one : ℤ
+-one : ℤ'
 -one = pred zero
 
-predl≡predr : (z : ℤ) → predl z ≡ predr z
-predl≡predr z = cong predl (sym (suc-predr z)) ∙ predl-suc (predr z)
-
-suc-predl : (n : ℤ) → suc (predl n) ≡ n
-suc-predl n = cong (λ n → suc (predl n)) (sym (suc-predr n)) ∙ cong suc (predl-suc _) ∙ suc-predr n
-
-suc-pred = suc-predl
-
-elim : ∀ {ℓ} (A : ℤ → Type ℓ)
+elim : ∀ {ℓ} (A : ℤ' → Type ℓ)
        (z : A zero)
-       (s : (n : ℤ) → A n → A (suc n))
-       (p : (n : ℤ) → A n → A (predl n))
-       (p' : (n : ℤ) → A n → A (predr n))
-       (ps : (n : ℤ) → (x : A n) → PathP (λ i → A (predl-suc n i)) (p (suc n) (s n x)) x)
-       (sp' : (n : ℤ) → (x : A n) → PathP (λ i → A (suc-predr n i)) (s (predr n) (p' n x)) x)
-       (n : ℤ) → A n
+       (s : (n : ℤ') → A n → A (suc n))
+       (p : (n : ℤ') → A n → A (predl n))
+       (p' : (n : ℤ') → A n → A (predr n))
+       (ps : (n : ℤ') → (x : A n) → PathP (λ i → A (predl-suc n i)) (p (suc n) (s n x)) x)
+       (sp' : (n : ℤ') → (x : A n) → PathP (λ i → A (suc-predr n i)) (s (predr n) (p' n x)) x)
+       (n : ℤ') → A n
 elim A z s p p' ps sp' zero = z
 elim A z s p p' ps sp' (suc n) = s n (elim A z s p p' ps sp' n)
 elim A z s p p' ps sp' (predl n) = p n (elim A z s p p' ps sp' n)
@@ -52,23 +34,23 @@ elim A z s p p' ps sp' (suc-predr n i) = sp' n (elim A z s p p' ps sp' n) i
 
 -- same as above but with same function for the two predecessors (which is what
 -- we use in practice)
-elim' : ∀ {ℓ} (A : ℤ → Type ℓ)
+elim' : ∀ {ℓ} (A : ℤ' → Type ℓ)
         (z : A zero)
-        (s : (n : ℤ) → A n → A (suc n))
-        (p : (n : ℤ) → A n → A (predl n))
-        (ps : (n : ℤ) → (x : A n) → PathP (λ i → A (predl-suc n i)) (p (suc n) (s n x)) x)
-        (sp' : (n : ℤ) → (x : A n) → PathP (λ i → A (suc-predr n i)) (s (predr n) (subst A (predl≡predr n) (p n x))) x)
-        (n : ℤ) → A n
+        (s : (n : ℤ') → A n → A (suc n))
+        (p : (n : ℤ') → A n → A (predl n))
+        (ps : (n : ℤ') → (x : A n) → PathP (λ i → A (predl-suc n i)) (p (suc n) (s n x)) x)
+        (sp' : (n : ℤ') → (x : A n) → PathP (λ i → A (suc-predr n i)) (s (predr n) (subst A (predl≡predr n) (p n x))) x)
+        (n : ℤ') → A n
 elim' A z s p ps sp' n = elim A z s p (λ n An → subst A (predl≡predr n) (p n An)) ps sp' n
 
 rec : ∀ {ℓ} {A : Type ℓ}
        (z : A)
-       (s : ℤ → A → A)
-       (p : ℤ → A → A)
-       (p' : ℤ → A → A)
-       (ps : (n : ℤ) → (x : A) → (p (suc n) (s n x)) ≡ x)
-       (sp' : (n : ℤ) → (x : A) → (s (predr n) (p' n x)) ≡ x) →
-       ℤ → A
+       (s : ℤ' → A → A)
+       (p : ℤ' → A → A)
+       (p' : ℤ' → A → A)
+       (ps : (n : ℤ') → (x : A) → (p (suc n) (s n x)) ≡ x)
+       (sp' : (n : ℤ') → (x : A) → (s (predr n) (p' n x)) ≡ x) →
+       ℤ' → A
 rec {A = A} z s p p' ps sp' n = elim (λ _ → A) z s p p' ps sp' n
 
 -- elim : ∀ {ℓ} (A : ℤ → Type ℓ)
@@ -116,7 +98,7 @@ rec {A = A} z s p p' ps sp' n = elim (λ _ → A) z s p p' ps sp' n
 -- simpl (predl-suc n i) = {!!}
 -- simpl (suc-predr n i) = {!!}
 
-postulate discrete : Discrete ℤ
+postulate discrete : Discrete ℤ'
 -- discreteℤ zero zero = yes refl
 -- discreteℤ zero (suc n) = {!!}
 -- discreteℤ zero (predl n) = {!!}
@@ -136,7 +118,7 @@ postulate discrete : Discrete ℤ
 -- discreteℤ (predl-suc m i) n = {!!}
 -- discreteℤ (suc-predr m i) n = {!!}
 
-ℤ-isSet : isSet ℤ
+ℤ-isSet : isSet ℤ'
 ℤ-isSet = Discrete→isSet discrete
 
 postulate
@@ -144,7 +126,7 @@ postulate
   -- with subst
   1≢0 : ¬ (suc zero ≡ zero)
 
-_+_ : ℤ → ℤ → ℤ
+_+_ : ℤ' → ℤ' → ℤ'
 zero + n = n
 suc m + n = suc (m + n)
 predl m + n = predl (m + n)
@@ -153,22 +135,22 @@ predl-suc m i + n = predl-suc (m + n) i
 suc-predr m i + n = suc-predr (m + n) i
 
 postulate
-  +-assoc : (m n o : ℤ) → m + (n + o) ≡ (m + n) + o
-  +-comm : (m n : ℤ) → m + n ≡ n + m
-  zero-+ : (n : ℤ) → zero + n ≡ n
-  +-zero : (n : ℤ) → n + zero ≡ n
-  +-suc : (m n : ℤ) → m + suc n ≡ suc (m + n)
-  +-pred : (m n : ℤ) → m + pred n ≡ pred (m + n)
-  +-predr : (m n : ℤ) → m + predr n ≡ predr (m + n)
-  +1-suc : (n : ℤ) → n + one ≡ suc n
-  -1+suc : (n : ℤ) → -one + suc n ≡ n
-  suc+-1 : (n : ℤ) → suc n + -one ≡ n
+  +-assoc : (m n o : ℤ') → m + (n + o) ≡ (m + n) + o
+  +-comm : (m n : ℤ') → m + n ≡ n + m
+  zero-+ : (n : ℤ') → zero + n ≡ n
+  +-zero : (n : ℤ') → n + zero ≡ n
+  +-suc : (m n : ℤ') → m + suc n ≡ suc (m + n)
+  +-pred : (m n : ℤ') → m + pred n ≡ pred (m + n)
+  +-predr : (m n : ℤ') → m + predr n ≡ predr (m + n)
+  +1-suc : (n : ℤ') → n + one ≡ suc n
+  -1+suc : (n : ℤ') → -one + suc n ≡ n
+  suc+-1 : (n : ℤ') → suc n + -one ≡ n
 
-cong-+-r : (m : ℤ) {n n' : ℤ} → n ≡ n' → m + n ≡ m + n'
+cong-+-r : (m : ℤ') {n n' : ℤ'} → n ≡ n' → m + n ≡ m + n'
 cong-+-r m p = cong (λ n → m + n) p
 
 -- opposite of an integer
-neg : ℤ → ℤ
+neg : ℤ' → ℤ'
 neg zero = zero
 neg (suc n) = predl (neg n)
 neg (predl n) = suc (neg n)
@@ -177,17 +159,17 @@ neg (predl-suc n i) = suc-predl (neg n) i
 neg (suc-predr n i) = predl-suc (neg n) i
 
 postulate
-  neg-neg : (n : ℤ) → neg (neg n) ≡ n
-  neg+≡0 : (n : ℤ) → (neg n) + n ≡ zero
-  +neg≡0 : (n : ℤ) → n + (neg n) ≡ zero
-  neg-+ : (m n : ℤ) → neg (m + n) ≡ neg m + neg n
+  neg-neg : (n : ℤ') → neg (neg n) ≡ n
+  neg+≡0 : (n : ℤ') → (neg n) + n ≡ zero
+  +neg≡0 : (n : ℤ') → n + (neg n) ≡ zero
+  neg-+ : (m n : ℤ') → neg (m + n) ≡ neg m + neg n
 
-_-_ : ℤ → ℤ → ℤ
+_-_ : ℤ' → ℤ' → ℤ'
 m - n = m + neg n
 
 postulate
-  n-n≡0 : (n : ℤ) → n - n ≡ zero
-  -1-pred : (n : ℤ) → n - one ≡ pred n
+  n-n≡0 : (n : ℤ') → n - n ≡ zero
+  -1-pred : (n : ℤ') → n - one ≡ pred n
 
 -- op-op : (n : ℤ) → op (op n) ≡ n
 -- op-op zero = refl
@@ -197,7 +179,7 @@ postulate
 -- op-op (predl-suc n i) = {!!} -- op (op (predl-suc n i)) ≡ predl-suc n i
 -- op-op (suc-predr n i) = {!!} -- op (op (suc-predr n i)) ≡ suc-predr n i
 
-fromℕ : ℕ → ℤ
+fromℕ : ℕ → ℤ'
 fromℕ ℕ.zero = zero
 fromℕ (ℕ.suc n) = suc (fromℕ n)
 
@@ -208,17 +190,17 @@ postulate
 --- Comparison with non-quotiented definition
 ---
 
-open import Cubical.Data.Int as Int using (Int ; pos ; negsuc ; sucInt ; predInt ; predSuc ; sucPred)
+open import Cubical.Data.Int as Int using (ℤ ; pos ; negsuc ; sucℤ ; predℤ ; predSuc ; sucPred)
 
-toInt : ℤ → Int
-toInt zero = pos ℕ.zero
-toInt (suc n) = sucInt (toInt n)
-toInt (predl n) = predInt (toInt n)
-toInt (predr n) = predInt (toInt n)
+toInt : ℤ' → ℤ
+toInt zero = Int.pos ℕ.zero
+toInt (suc n) = Int.sucℤ (toInt n)
+toInt (predl n) = Int.predℤ (toInt n)
+toInt (predr n) = Int.predℤ (toInt n)
 toInt (predl-suc n i) = predSuc (toInt n) i
 toInt (suc-predr n i) = sucPred (toInt n) i
 
-fromInt : Int → ℤ
+fromInt : ℤ → ℤ'
 fromInt (pos n) = fromℕ n
 fromInt (negsuc n) = neg (fromℕ (ℕ.suc n))
 
@@ -226,7 +208,7 @@ open import Cubical.Core.Everything
 open import Cubical.Foundations.Isomorphism
 
 postulate
-  ℤ≃Int : ℤ ≃ Int
+  ℤ≃Int : ℤ' ≃ ℤ
   -- ℤ≃Int = isoToEquiv (iso toInt fromInt {!!} {!!})
 
 ---
@@ -250,26 +232,26 @@ postulate
 -- is-odd (predl-suc n i) = is-odd n
 -- is-odd (suc-predr n i) = is-odd n
 
-data is-even : ℤ → Type₀
-data is-odd  : ℤ → Type₀
+data is-even : ℤ' → Type₀
+data is-odd  : ℤ' → Type₀
 
 data is-even where
   even-zero  : is-even zero
-  even-suc   : {n : ℤ} → is-odd n → is-even (suc n)
-  even-predl : {n : ℤ} → is-odd n → is-even (predl n)
-  even-predr : {n : ℤ} → is-odd n → is-even (predr n)
+  even-suc   : {n : ℤ'} → is-odd n → is-even (suc n)
+  even-predl : {n : ℤ'} → is-odd n → is-even (predl n)
+  even-predr : {n : ℤ'} → is-odd n → is-even (predr n)
 
 data is-odd where
-  odd-suc   : {n : ℤ} → is-even n → is-odd (suc n)
-  odd-predl : {n : ℤ} → is-even n → is-odd (predl n)
-  odd-predr : {n : ℤ} → is-even n → is-odd (predr n)
+  odd-suc   : {n : ℤ'} → is-even n → is-odd (suc n)
+  odd-predl : {n : ℤ'} → is-even n → is-odd (predl n)
+  odd-predr : {n : ℤ'} → is-even n → is-odd (predr n)
 
 -- is-even-zero : (e : is-even zero) → e ≡ even-zero
 -- is-even-zero e = {!!}
 
 -- TODO
-postulate is-even-isProp : {n : ℤ} → isProp (is-even n)
-postulate is-odd-isProp  : {n : ℤ} → isProp (is-odd n)
+postulate is-even-isProp : {n : ℤ'} → isProp (is-even n)
+postulate is-odd-isProp  : {n : ℤ'} → isProp (is-odd n)
 -- is-even-isProp {zero} e e' = {!!}
 -- is-even-isProp {suc n} e e' = {!!}
 -- is-even-isProp {predl n} e e' = {!!}
@@ -278,7 +260,7 @@ postulate is-odd-isProp  : {n : ℤ} → isProp (is-odd n)
 -- is-even-isProp {suc-predr n i} e e' = {!!}
 -- is-odd-isProp o o' = {!!}
 
-postulate even-or-odd : (n : ℤ) → ¬ (is-even n × is-odd n)
+postulate even-or-odd : (n : ℤ') → ¬ (is-even n × is-odd n)
 -- even-or-odd zero (e , o) = {!!}
 -- even-or-odd (suc n) (e , o) = {!!}
 -- even-or-odd (predl n) (e , o) = {!!}
@@ -287,14 +269,14 @@ postulate even-or-odd : (n : ℤ) → ¬ (is-even n × is-odd n)
 -- even-or-odd (suc-predr n i) (e , o) = {!!}
 
 postulate
-  even-suc-inv : (n : ℤ) → is-even (suc n) → is-odd n
+  even-suc-inv : (n : ℤ') → is-even (suc n) → is-odd n
 
 open import Cubical.Data.Sum
 
-dec-parity : (n : ℤ) → Type₀
+dec-parity : (n : ℤ') → Type₀
 dec-parity n = is-even n ⊎ is-odd n
 
-parity : (n : ℤ) → dec-parity n
+parity : (n : ℤ') → dec-parity n
 parity zero = inl even-zero
 parity (suc n) with parity n
 ... | inl e = inr (odd-suc e)
@@ -311,7 +293,7 @@ parity (predl-suc n i) = lem n i
   -- lem : (n : ℤ) → PathP (λ i → dec-parity (predl-suc n i)) (parity (predl (suc n))) (parity n)
   -- lem n = cong parity (predl-suc n)
   -- TODO
-  postulate lem : (n : ℤ) → PathP (λ i → dec-parity (predl-suc n i)) (parity (predl (suc n))) (parity n)
+  postulate lem : (n : ℤ') → PathP (λ i → dec-parity (predl-suc n i)) (parity (predl (suc n))) (parity n)
   -- lem zero = {!!}
   -- lem (suc n) = {!!}
   -- lem (predl n) = {!!}
@@ -327,7 +309,7 @@ parity (predl-suc n i) = lem n i
   -- lem (suc-predr n i) = {!!}
 parity (suc-predr n i) = lem n i
   where
-  postulate lem : (n : ℤ) → PathP (λ i → dec-parity (suc-predr n i)) (parity (suc (predr n))) (parity n)
+  postulate lem : (n : ℤ') → PathP (λ i → dec-parity (suc-predr n i)) (parity (suc (predr n))) (parity n)
 
 -- parity-rec : ∀ {ℓ} (A : ℤ → Type ℓ) → ({n : ℤ} → is-even n → A n) → ({n : ℤ} → is-odd n → A n) → (n : ℤ) → A n
 -- parity-rec A even odd n with parity n
@@ -342,36 +324,33 @@ is-evenℕ even-zero    = even-zero
 is-evenℕ (even-suc p) = even-suc (is-oddℕ p)
 is-oddℕ  (odd-suc p)  = odd-suc  (is-evenℕ p)
 
-abs : ℤ → ℕ
-abs n = Int.abs (toInt n)
-
 postulate
-  zero-abs : {n : ℤ} → abs n ≡ 0 → n ≡ zero
+  zero-abs : {n : ℤ'} → abs n ≡ 0 → n ≡ zero
 
 -- order
 
-_≤_ : ℤ → ℤ → Type₀
+_≤_ : ℤ' → ℤ' → Type₀
 m ≤ n = Σ ℕ λ k → fromℕ k + m ≡ n
 
-_<_ : ℤ → ℤ → Type₀
+_<_ : ℤ' → ℤ' → Type₀
 m < n = suc m ≤ n
 
-_>_ : ℤ → ℤ → Type₀
+_>_ : ℤ' → ℤ' → Type₀
 m > n = n < m
 
 0<1 : zero < one
 0<1 = 0 , refl
 
-≤-refl : {n : ℤ} → n ≤ n
+≤-refl : {n : ℤ'} → n ≤ n
 ≤-refl {n} = 0 , refl
 
-≤-≡ : {m n : ℤ} → m ≡ n → m ≤ n
+≤-≡ : {m n : ℤ'} → m ≡ n → m ≤ n
 ≤-≡ {m} {n} p = subst (λ n → m ≤ n) p ≤-refl
 
-≤-path : {m n : ℤ} → m ≡ n → m ≤ n
+≤-path : {m n : ℤ'} → m ≡ n → m ≤ n
 ≤-path {m} {n} p = subst (λ n → m ≤ n) p ≤-refl
 
-≤-trans : {m n o : ℤ} → m ≤ n → n ≤ o → m ≤ o
+≤-trans : {m n o : ℤ'} → m ≤ n → n ≤ o → m ≤ o
 ≤-trans {m} {n} {o} m≤n n≤o = fst m≤n ℕ.+ fst n≤o ,
   (fromℕ (fst m≤n ℕ.+ fst n≤o) + m          ≡⟨ cong (λ n → n + m) (fromℕ-+ (fst m≤n) (fst n≤o)) ⟩
   (fromℕ (fst m≤n) + fromℕ (fst n≤o)) + m   ≡⟨ cong (λ n → n + m) (+-comm (fromℕ (fst m≤n)) _) ⟩
@@ -380,54 +359,54 @@ m > n = n < m
   fromℕ (fst n≤o) + n                       ≡⟨ snd n≤o ⟩
   o                                         ∎)
 
-≤-suc : {m n : ℤ} → m ≤ n → m ≤ suc n
+≤-suc : {m n : ℤ'} → m ≤ n → m ≤ suc n
 ≤-suc (k , p) = suc k , cong suc p
 
-<→≤ : {m n : ℤ} → m < n → m ≤ n
+<→≤ : {m n : ℤ'} → m < n → m ≤ n
 <→≤ m<n = ≤-trans (≤-suc ≤-refl) m<n
 
 postulate
-  ≤-neg : {m n : ℤ} → neg n ≤ neg m → m ≤ n
-  pos-fromℕ : {n : ℤ} → zero ≤ n → Σ ℕ (λ n' → n ≡ fromℕ n')
+  ≤-neg : {m n : ℤ'} → neg n ≤ neg m → m ≤ n
+  pos-fromℕ : {n : ℤ'} → zero ≤ n → Σ ℕ (λ n' → n ≡ fromℕ n')
 
-data Trichotomy (m n : ℤ) : Type₀ where
+data Trichotomy (m n : ℤ') : Type₀ where
   lt : m < n → Trichotomy m n
   eq : m ≡ n → Trichotomy m n
   gt : n < m → Trichotomy m n
 
 postulate
-  _≟_ : (m n : ℤ) → Trichotomy m n
+  _≟_ : (m n : ℤ') → Trichotomy m n
 
 -- even/odd folding of ℤ into ℕ
-ℤ≃ℕ : ℤ ≃ ℕ
-ℤ≃ℕ = isoToEquiv i
+ℤ'≃ℕ : ℤ' ≃ ℕ
+ℤ'≃ℕ = isoToEquiv i
   where
-  f : ℤ → ℕ
+  f : ℤ' → ℕ
   f n with toInt n
-  ... | pos k = 2 ℕ.* k
-  ... | negsuc k = suc (2 ℕ.* k)
-  g : ℕ → ℤ
+  ... | pos k = 2 ℕ.· k
+  ... | negsuc k = suc (2 ℕ.· k)
+  g : ℕ → ℤ'
   g n = aux (ℕ.parity n)
     where
-    aux : {n : ℕ} → ℕ.is-even n ⊎ ℕ.is-odd n → ℤ
-    aux (inl even-zero) = ℤ.zero
+    aux : {n : ℕ} → ℕ.is-even n ⊎ ℕ.is-odd n → ℤ'
+    aux (inl even-zero) = ℤ'.zero
     aux (inl (even-suc (odd-suc p))) = suc (aux (inl p))
     aux (inr (odd-suc even-zero)) = neg one
     aux (inr (odd-suc (even-suc p))) = pred (aux (inr p))
-  i : Iso ℤ ℕ
+  i : Iso ℤ' ℕ
   Iso.fun i = f
   Iso.inv i = g
   Iso.rightInv i n = {!!}
   Iso.leftInv i n = {!!}
 
 -- a well founded order on ℤ
-_≺_ : ℤ → ℤ → Type₀
-m ≺ n = equivFun ℤ≃ℕ m ℕ.< equivFun ℤ≃ℕ n
+_≺_ : ℤ' → ℤ' → Type₀
+m ≺ n = equivFun ℤ'≃ℕ m ℕ.< equivFun ℤ'≃ℕ n
 
 open import Cubical.Foundations.Univalence
 
 postulate
-  ≺≡< : transport (cong (λ N → N → N → Type₀) (ua ℤ≃ℕ)) _≺_ ≡ ℕ._<_
+  ≺≡< : transport (cong (λ N → N → N → Type₀) (ua ℤ'≃ℕ)) _≺_ ≡ ℕ._<_
 
 open import Cubical.Induction.WellFounded
 

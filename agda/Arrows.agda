@@ -8,8 +8,8 @@ open import Cubical.Foundations.Isomorphism
 open import Cubical.Foundations.Equiv
 open import Cubical.Foundations.HLevels
 open import Cubical.Foundations.Univalence
+open import Cubical.Foundations.Transport
 open import Cubical.Relation.Nullary
-open import Cubical.Relation.Nullary.DecidableEq
 open import Cubical.Relation.Binary
 open BinaryRelation using (isEquivRel)
 open import Cubical.Data.Empty as ⊥
@@ -124,7 +124,7 @@ prev-op (inl a , d) = refl
 prev-op (inr b , d) = refl
 
 abstract
-  iterate-+ : (m n : ℤ) (e : dArrows) → iterate n (iterate m e) ≡ iterate (m ℤ.+ n) e
+  iterate-+ : (m n : ℤ') (e : dArrows) → iterate n (iterate m e) ≡ iterate (m ℤ.+ n) e
   iterate-+ m n e = ℤ.elim
     (λ n → iterate n (iterate m e) ≡ iterate (m ℤ.+ n) e)
     (cong (λ m → iterate m e) (sym (ℤ.+-zero m)))
@@ -135,7 +135,7 @@ abstract
     (λ n p → toPathP (Ends-isSet _ _ _ _))
     n
 
-iterate-op : (n : ℤ) (e : dArrows) → iterate n (op e) ≡ op (iterate (ℤ.neg n) e)
+iterate-op : (n : ℤ') (e : dArrows) → iterate n (op e) ≡ op (iterate (ℤ.neg n) e)
 iterate-op n e = ℤ.elim
   (λ n → iterate n (op e) ≡ op (iterate (ℤ.neg n) e))
   refl
@@ -146,10 +146,10 @@ iterate-op n e = ℤ.elim
   (λ n p → toPathP (Ends-isSet _ _ _ _))
   n
 
-iterate-neg : (n : ℤ) (e : dArrows) → iterate (ℤ.neg n) e ≡ op (iterate n (op e))
+iterate-neg : (n : ℤ') (e : dArrows) → iterate (ℤ.neg n) e ≡ op (iterate n (op e))
 iterate-neg n e = sym (op-op _) ∙ cong op (sym (iterate-op n e))
 
-iterate-neg-op : (n : ℤ) (e : dArrows) → iterate (ℤ.neg n) (op e) ≡ op (iterate n e)
+iterate-neg-op : (n : ℤ') (e : dArrows) → iterate (ℤ.neg n) (op e) ≡ op (iterate n e)
 iterate-neg-op n e = iterate-neg n (op e) ∙ cong (op ∘ (iterate n)) (op-op e)
 
 -- parity
@@ -166,10 +166,10 @@ prev-A-switch (is-inl x) = is-inr _
 prev-B-switch : {x : dArrows} → in-right (arrow x) → in-left (arrow (prev x))
 prev-B-switch (is-inr x) = is-inl _
 
-iterate-A-even : {x : dArrows} → in-left (arrow x)  → {n : ℤ} → ℤ.is-even n → in-left  (arrow (iterate n x))
-iterate-A-odd  : {x : dArrows} → in-left (arrow x)  → {n : ℤ} → ℤ.is-odd  n → in-right (arrow (iterate n x))
-iterate-B-even : {x : dArrows} → in-right (arrow x) → {n : ℤ} → ℤ.is-even n → in-right (arrow (iterate n x))
-iterate-B-odd  : {x : dArrows} → in-right (arrow x) → {n : ℤ} → ℤ.is-odd  n → in-left  (arrow (iterate n x))
+iterate-A-even : {x : dArrows} → in-left (arrow x)  → {n : ℤ'} → ℤ.is-even n → in-left  (arrow (iterate n x))
+iterate-A-odd  : {x : dArrows} → in-left (arrow x)  → {n : ℤ'} → ℤ.is-odd  n → in-right (arrow (iterate n x))
+iterate-B-even : {x : dArrows} → in-right (arrow x) → {n : ℤ'} → ℤ.is-even n → in-right (arrow (iterate n x))
+iterate-B-odd  : {x : dArrows} → in-right (arrow x) → {n : ℤ'} → ℤ.is-odd  n → in-left  (arrow (iterate n x))
 iterate-A-even (is-inl x) even-zero = is-inl x
 iterate-A-even (is-inl x) (even-suc p) = next-B-switch (iterate-A-odd (is-inl x) p)
 iterate-A-even (is-inl x) (even-predl p) = prev-B-switch (iterate-A-odd (is-inl x) p)
@@ -190,12 +190,12 @@ iterate-B-odd (is-inr b) (odd-predr p) = prev-B-switch (iterate-B-even (is-inr b
 ---
 
 reachable-is-reachable : (e e' : dArrows) → reachable e e' → is-reachable e e'
-reachable-is-reachable e e' r = ∣ r ∣
+reachable-is-reachable e e' r = ∣ r ∣₁
 
 -- reachability
 -- note that this is not a proposition, so that we often have to truncate
 reachable-arr : Arrows → Arrows → Type ℓ
-reachable-arr a b = Σ ℤ (λ n → arrow (iterate n (fw a)) ≡ b)
+reachable-arr a b = Σ ℤ' (λ n → arrow (iterate n (fw a)) ≡ b)
 
 reachable-op : {e e' : dArrows} → reachable (op e') (op e) → reachable e e'
 reachable-op {e} {e'} (n , r)  = n , (
@@ -240,10 +240,10 @@ reachable-arr-isSet : (a b : Arrows) → isSet (reachable-arr a b)
 reachable-arr-isSet a b = isSetΣ ℤ-isSet λ _ → isProp→isSet (Arrows-isSet _ _)
 
 is-reachable-arr : (a b : Arrows) → Type ℓ
-is-reachable-arr a b = ∥ reachable-arr a b ∥
+is-reachable-arr a b = ∥ reachable-arr a b ∥₁
 
 is-reachable-arr-isProp : (a b : Arrows) → isProp (is-reachable-arr a b)
-is-reachable-arr-isProp a b = propTruncIsProp
+is-reachable-arr-isProp a b = isPropPropTrunc
 
 reachable-refl : {e : dArrows} → reachable e e
 reachable-refl = ℤ.zero , refl
@@ -277,16 +277,16 @@ reachable-zero : {e e' : dArrows} (r : reachable e e') → fst r ≡ zero → e 
 reachable-zero {e} (n , r) l≡0 = subst (λ n → e ≡ iterate n e) (sym l≡0) refl ∙ r
 
 is-reachable-refl : {e : dArrows} → is-reachable e e
-is-reachable-refl {e} = ∣ isEquivRel.reflexive reachable-is-equiv e ∣
+is-reachable-refl {e} = ∣ isEquivRel.reflexive reachable-is-equiv e ∣₁
 
 is-reachable-path : {e e' : dArrows} → e ≡ e' → is-reachable e e'
 is-reachable-path {e} p = subst (is-reachable e) p is-reachable-refl
 
 is-reachable-sym : {e e' : dArrows} → is-reachable e e' → is-reachable e' e
-is-reachable-sym {e} {e'} r = ∥∥.rec propTruncIsProp (λ r → ∣ isEquivRel.symmetric reachable-is-equiv e e' r ∣) r
+is-reachable-sym {e} {e'} r = ∥∥.rec isPropPropTrunc (λ r → ∣ isEquivRel.symmetric reachable-is-equiv e e' r ∣₁) r
 
 is-reachable-trans : {e e' e'' : dArrows} → is-reachable e e' → is-reachable e' e'' → is-reachable e e''
-is-reachable-trans r r' = ∥∥.rec propTruncIsProp (λ r → ∥∥.rec propTruncIsProp (λ r' → ∣ isEquivRel.transitive reachable-is-equiv _ _ _ r r' ∣) r') r
+is-reachable-trans r r' = ∥∥.rec isPropPropTrunc (λ r → ∥∥.rec isPropPropTrunc (λ r' → ∣ isEquivRel.transitive reachable-is-equiv _ _ _ r r' ∣₁) r') r
 
 is-reachable-is-equiv : isEquivRel is-reachable
 isEquivRel.reflexive is-reachable-is-equiv e = is-reachable-refl
@@ -332,16 +332,16 @@ isEquivRel.symmetric reachable-arr-is-equiv a b r = reachable-arr-sym r
 isEquivRel.transitive reachable-arr-is-equiv a b c r s = reachable-arr-trans r s
 
 is-reachable-arr-refl : {a : Arrows} → is-reachable-arr a a
-is-reachable-arr-refl = ∣ reachable-arr-refl ∣
+is-reachable-arr-refl = ∣ reachable-arr-refl ∣₁
 
 is-reachable-arr-path : {a b : Arrows} → a ≡ b → is-reachable-arr a b
 is-reachable-arr-path {a} p = subst (is-reachable-arr a) p is-reachable-arr-refl
 
 is-reachable-arr-sym : {a b : Arrows} → is-reachable-arr a b → is-reachable-arr b a
-is-reachable-arr-sym {a} {b} r = ∥∥.rec propTruncIsProp (λ r → ∣ isEquivRel.symmetric reachable-arr-is-equiv a b r ∣) r
+is-reachable-arr-sym {a} {b} r = ∥∥.rec isPropPropTrunc (λ r → ∣ isEquivRel.symmetric reachable-arr-is-equiv a b r ∣₁) r
 
 is-reachable-arr-trans : {a b c : Arrows} → is-reachable-arr a b → is-reachable-arr b c → is-reachable-arr a c
-is-reachable-arr-trans r r' = ∥∥.rec propTruncIsProp (λ r → ∥∥.rec propTruncIsProp (λ r' → ∣ reachable-arr-trans r r' ∣) r') r
+is-reachable-arr-trans r r' = ∥∥.rec isPropPropTrunc (λ r → ∥∥.rec isPropPropTrunc (λ r' → ∣ reachable-arr-trans r r' ∣₁) r') r
 
 is-reachable-arr-is-equiv : isEquivRel is-reachable-arr
 isEquivRel.reflexive is-reachable-arr-is-equiv _ = is-reachable-arr-refl
@@ -357,8 +357,8 @@ abstract
   -- because ℤ is searchable)
   -- NB: we need both A to be a set and discrete
   reachable-arr-reveal : {a b : Arrows} → is-reachable-arr a b → reachable-arr a b
-  reachable-arr-reveal {a} {b} r = transport (Σ-ap₁ (ua (invEquiv ℤ≃ℕ)))
-      (ℕ.find _ (λ _ → Arrows-isSet _ _) (λ n → Arrows-discrete _ _) (transport (cong ∥_∥ (Σ-ap (ua ℤ≃ℕ) (λ n → cong (λ n → arrow (iterate n (fw a)) ≡ b) (sym (funExt⁻ (lem ℤ≃ℕ) n))))) r))
+  reachable-arr-reveal {a} {b} r = {!!} -- transport (Σ-ap₁ (ua (invEquiv ℤ≃ℕ)))
+      -- (ℕ.find _ (λ _ → Arrows-isSet _ _) (λ n → Arrows-discrete _ _) (transport (cong ∥_∥₁ (Σ-ap (ua ℤ≃ℕ) (λ n → cong (λ n → arrow (iterate n (fw a)) ≡ b) (sym (funExt⁻ (lem ℤ≃ℕ) n))))) r))
     where
     lem : {ℓ : Level} {A : Type ℓ} {B : Type ℓ} (e : A ≃ B) → transport (ua (invEquiv e)) ∘ transport (ua e) ≡ idfun A
     lem {_} {A} {B} e =
@@ -371,12 +371,12 @@ abstract
 
   -- same as above (plus we can test the ends...)
   reachable-reveal : {a b : dArrows} → is-reachable a b → reachable a b
-  reachable-reveal {a} {b} r = transport (Σ-ap₁ (ua (invEquiv ℤ≃ℕ)))
-       (ℕ.find _ (λ _ → Ends-isSet _ _) (λ n → Ends-discrete _ _) (transport (cong ∥_∥ (Σ-ap (ua ℤ≃ℕ) (λ n → cong (λ n → iterate n a ≡ b) (sym (funExt⁻ (lem ℤ≃ℕ) n))))) r))
+  reachable-reveal {a} {b} r = {!!} -- transport (Σ-ap₁ (ua (invEquiv ℤ≃ℕ)))
+       -- (ℕ.find _ (λ _ → Ends-isSet _ _) (λ n → Ends-discrete _ _) (transport (cong ∥_∥ (Σ-ap (ua ℤ≃ℕ) (λ n → cong (λ n → iterate n a ≡ b) (sym (funExt⁻ (lem ℤ≃ℕ) n))))) r))
     where
     lem : {ℓ : Level} {A : Type ℓ} {B : Type ℓ} (e : A ≃ B) → transport (ua (invEquiv e)) ∘ transport (ua e) ≡ idfun A
     lem {_} {A} {B} e =
-      transport (ua (invEquiv e)) ∘ transport (ua e) ≡⟨ funExt (λ x → sym (transportComposite (ua e) (ua (invEquiv e)) x)) ⟩
+      transport (ua (invEquiv e)) ∘ transport (ua e) ≡⟨ {!funExt (λ x → sym (transportComposite (ua e) (ua (invEquiv e)) x))!} ⟩
       transport (ua e ∙ ua (invEquiv e))             ≡⟨ cong transport (sym (uaCompEquiv e (invEquiv e))) ⟩
       transport (ua (compEquiv e (invEquiv e)))      ≡⟨ cong (transport ∘ ua) (invEquiv-is-rinv e) ⟩
       transport (ua (idEquiv A))                     ≡⟨ cong transport uaIdEquiv ⟩
@@ -458,7 +458,7 @@ delements-isSet c = isSetΣ Ends-isSet λ _ → isProp→isSet (dChains-isSet _ 
 
 abstract
   delement-is-reachable : {o : Ends} (a : delements [ o ]) → is-reachable o (fst a)
-  delement-is-reachable {o} (a , r) = effective (λ _ _ → propTruncIsProp) is-reachable-is-equiv o a (sym r)
+  delement-is-reachable {o} (a , r) = effective (λ _ _ → isPropPropTrunc) is-reachable-is-equiv o a (sym r)
 
   delement-reachable : {o : Ends} (a : delements [ o ]) → reachable o (fst a)
   delement-reachable a = reachable-reveal (delement-is-reachable a)
@@ -486,10 +486,10 @@ elements-isSet c = isSetΣ Arrows-isSet (λ _ → isProp→isSet (Chains-isSet _
 -- NB: this is the kind of place where we use the fact that we quotient under the propositional truncation in order to have effectivity
 abstract
   delements-is-reachable : {c : dChains} (a b : delements c) → is-reachable (fst a) (fst b)
-  delements-is-reachable {c} (a , p) (b , q) = effective (λ _ _ → propTruncIsProp) is-reachable-is-equiv a b (p ∙ sym q)
+  delements-is-reachable {c} (a , p) (b , q) = effective (λ _ _ → isPropPropTrunc) is-reachable-is-equiv a b (p ∙ sym q)
 
   element-is-reachable-arr : {o : Arrows} (a : elements [ o ]) → is-reachable-arr o (fst a)
-  element-is-reachable-arr {o} (a , p) = effective (λ _ _ → propTruncIsProp) is-reachable-arr-is-equiv o a (sym p)
+  element-is-reachable-arr {o} (a , p) = effective (λ _ _ → isPropPropTrunc) is-reachable-arr-is-equiv o a (sym p)
 
   element-reachable-arr : {o : Arrows} (a : elements [ o ]) → reachable-arr o (fst a)
   element-reachable-arr a = reachable-arr-reveal (element-is-reachable-arr a)
@@ -499,7 +499,7 @@ abstract
 
   -- two elements of a chains are reachable-arr (this is a variant of the above)
   elements-is-reachable-arr : {c : Chains} (a b : elements c) → is-reachable-arr (fst a) (fst b)
-  elements-is-reachable-arr (a , p) (b , q) = effective (λ _ _ → propTruncIsProp) is-reachable-arr-is-equiv a b (p ∙ sym q)
+  elements-is-reachable-arr (a , p) (b , q) = effective (λ _ _ → isPropPropTrunc) is-reachable-arr-is-equiv a b (p ∙ sym q)
 
   elements-reachable-arr : {c : Chains} (a b : elements c) → reachable-arr (fst a) (fst b)
   elements-reachable-arr a b = reachable-arr-reveal (elements-is-reachable-arr a b)
@@ -547,7 +547,7 @@ elements→delements : {o : Arrows} → elements [ o ] → delements [ fw o ]
 elements→delements {o} a = element-end a , p
   where
   abstract
-    p = sym (eq/ _ _ ∣ element-end-reachable-arr a ∣)
+    p = sym (eq/ _ _ ∣ element-end-reachable-arr a ∣₁)
 
 -- -- directing an element preserves the underlying arrow
 -- elements→delements-arrow : {o : Arrows} (a : elements [ o ]) → arrow (fst (elements→delements a)) ≡ fst a
@@ -560,8 +560,8 @@ delements≃elements {o} = isoToEquiv i
   i : Iso (delements [ fw o ]) (elements [ o ])
   Iso.fun i = delements→elements
   Iso.inv i = elements→delements
-  Iso.rightInv i a = ΣProp≡ (λ _ → Chains-isSet _ _) (arrow-element-end _)
-  Iso.leftInv i a = ΣProp≡ (λ _ → dChains-isSet _ _) (unique-orientation (element-end-reachable-arr (delements→elements a)) (delement-reachable a) (arrow-element-end (delements→elements a)))
+  Iso.rightInv i a = Σ≡Prop (λ _ → Chains-isSet _ _) (arrow-element-end _)
+  Iso.leftInv i a = Σ≡Prop (λ _ → dChains-isSet _ _) (unique-orientation (element-end-reachable-arr (delements→elements a)) (delement-reachable a) (arrow-element-end (delements→elements a)))
 
 canonical-orientation : {o : Arrows} → delements [ fw o ] ≡ elements [ o ]
 canonical-orientation {o} = ua delements≃elements

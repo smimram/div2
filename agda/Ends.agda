@@ -5,7 +5,6 @@ module Ends where
 open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.Function
 open import Cubical.Relation.Nullary
-open import Cubical.Relation.Nullary.DecidableEq
 open import Cubical.Data.Empty as ⊥
 open import Cubical.Data.Unit renaming (Unit to ⊤)
 open import Cubical.Data.Sum

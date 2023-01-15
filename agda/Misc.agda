@@ -71,20 +71,20 @@ subst₂ B {a' = a'} p {b = b} q x = subst (B a') q (subst (λ a → B a b) p x)
 --- stolen from newer cubical library
 ---
 
-congP : {ℓ ℓ' : Level} {A : I → Type ℓ} {B : (i : I) → A i → Type ℓ'}
-  (f : (i : I) → (a : A i) → B i a) {x : A i0} {y : A i1}
-  (p : PathP A x y) → PathP (λ i → B i (p i)) (f i0 x) (f i1 y)
-congP f p i = f i (p i)
-{-# INLINE congP #-}
+-- congP : {ℓ ℓ' : Level} {A : I → Type ℓ} {B : (i : I) → A i → Type ℓ'}
+  -- (f : (i : I) → (a : A i) → B i a) {x : A i0} {y : A i1}
+  -- (p : PathP A x y) → PathP (λ i → B i (p i)) (f i0 x) (f i1 y)
+-- congP f p i = f i (p i)
+-- {-# INLINE congP #-}
 
-congP₂ : {ℓ ℓ' ℓ'' : Level} {A : I → Type ℓ} {B : (i : I) → A i → Type ℓ'}
-  {C : (i : I) (a : A i) → B i a → Type ℓ''}
-  (f : (i : I) → (a : A i) → (b : B i a) → C i a b)
-  {x : A i0} {y : A i1} {u : B i0 x} {v : B i1 y}
-  (p : PathP A x y) (q : PathP (λ i → B i (p i)) u v)
-  → PathP (λ i → C i (p i) (q i)) (f i0 x u) (f i1 y v)
-congP₂ f p q i = f i (p i) (q i)
-{-# INLINE congP₂ #-}
+-- congP₂ : {ℓ ℓ' ℓ'' : Level} {A : I → Type ℓ} {B : (i : I) → A i → Type ℓ'}
+  -- {C : (i : I) (a : A i) → B i a → Type ℓ''}
+  -- (f : (i : I) → (a : A i) → (b : B i a) → C i a b)
+  -- {x : A i0} {y : A i1} {u : B i0 x} {v : B i1 y}
+  -- (p : PathP A x y) (q : PathP (λ i → B i (p i)) u v)
+  -- → PathP (λ i → C i (p i) (q i)) (f i0 x u) (f i1 y v)
+-- congP₂ f p q i = f i (p i) (q i)
+-- {-# INLINE congP₂ #-}
 
 -- -- NB: this one should be part of the standard library ?
 -- transP : {ℓ : Level} {A B : I → Type ℓ}
@@ -101,15 +101,15 @@ postulate
     PathP (λ i → (a : A i) → B i a) f g
   -- funExtP {A = A} {B = B} {f = f} {g = g} p = toPathP (funExt (λ x → fromPathP {A = (λ i → B i (transp (λ j → A (i ∨ ~ j)) i x))} (p {!toPathP {A = A} {x = (transp (λ j → A (~ j)) i0 x)} {y = x} (transportTransport⁻ (λ i → A i) x)!})))
 
-transportComposite : {ℓ : Level} {A B C : Type ℓ} (p : A ≡ B) (q : B ≡ C) (x : A) → transport (p ∙ q) x ≡ transport q (transport p x)
-transportComposite = substComposite (λ X → X)
+-- transportComposite : {ℓ : Level} {A B C : Type ℓ} (p : A ≡ B) (q : B ≡ C) (x : A) → transport (p ∙ q) x ≡ transport q (transport p x)
+-- transportComposite = substComposite (λ X → X)
 
--- transporting over (λ i → B (p i) → C (p i)) divides the transport into
--- transports over (λ i → C (p i)) and (λ i → B (p (~ i)))
-funTypeTransp : ∀ {ℓ ℓ'} {A : Type ℓ} (B C : A → Type ℓ') {x y : A} (p : x ≡ y) (f : B x → C x)
-         → PathP (λ i → B (p i) → C (p i)) f (subst C p ∘ f ∘ subst B (sym p))
-funTypeTransp B C {x = x} p f i b =
-  transp (λ j → C (p (j ∧ i))) (~ i) (f (transp (λ j → B (p (i ∧ ~ j))) (~ i) b))
+-- -- transporting over (λ i → B (p i) → C (p i)) divides the transport into
+-- -- transports over (λ i → C (p i)) and (λ i → B (p (~ i)))
+-- funTypeTransp : ∀ {ℓ ℓ'} {A : Type ℓ} (B C : A → Type ℓ') {x y : A} (p : x ≡ y) (f : B x → C x)
+         -- → PathP (λ i → B (p i) → C (p i)) f (subst C p ∘ f ∘ subst B (sym p))
+-- funTypeTransp B C {x = x} p f i b =
+  -- transp (λ j → C (p (j ∧ i))) (~ i) (f (transp (λ j → B (p (i ∧ ~ j))) (~ i) b))
 
 -- same as isPropΠ but with implicit arguments
 isPropΠ' : {ℓ ℓ' : Level} {A : Type ℓ} {B : A → Type ℓ'} → (h : (x : A) → isProp (B x)) → isProp ({x : A} → B x)
@@ -157,18 +157,18 @@ isPropΣ' prop eq (a , b) (a' , b') = ΣPathP ((eq _ _ b b') , (toPathP (prop _ 
 --- custom elimination principle
 ---
 
-∥∥-elim : ∀ {ℓ ℓ'} {A : Type ℓ} {B : Type ℓ'} (SB : isSet B) (f : A → B) → ((a a' : A) → f a ≡ f a') → ∥ A ∥ → B
+∥∥-elim : ∀ {ℓ ℓ'} {A : Type ℓ} {B : Type ℓ'} (SB : isSet B) (f : A → B) → ((a a' : A) → f a ≡ f a') → ∥ A ∥₁ → B
 ∥∥-elim {ℓ} {ℓ'} {A} {B} SB f p a = fst (F a)
   where
   im : Type (ℓ-max ℓ ℓ')
-  im = Σ B (λ b → ∥ Σ A (λ a → f a ≡ b) ∥)
+  im = Σ B (λ b → ∥ Σ A (λ a → f a ≡ b) ∥₁)
   im-isProp : isProp im
-  im-isProp (b , e) (b' , e') = ΣPathP (b≡b' , toPathP (propTruncIsProp _ e'))
+  im-isProp (b , e) (b' , e') = ΣPathP (b≡b' , toPathP (isPropPropTrunc _ e'))
     where
     b≡b' : b ≡ b'
     b≡b' = ∥∥.elim (λ _ → SB b b') (λ { (a , q) → ∥∥.elim (λ _ → SB b b') (λ { (a' , q') → sym q ∙ p a a' ∙ q' }) e' }) e
-  F : ∥ A ∥ → im
-  F a = ∥∥.elim (λ _ → im-isProp) (λ a → f a , ∣ a , refl ∣) a
+  F : ∥ A ∥₁ → im
+  F a = ∥∥.elim (λ _ → im-isProp) (λ a → f a , ∣ a , refl ∣₁) a
 
 -- []-rec : ∀ {ℓ ℓ' ℓ''} {A : Type ℓ} (R : A → A → Type ℓ') {B : Type ℓ''} →
         -- (f : (a : A) → B) →
@@ -224,8 +224,8 @@ equivΣProp {_} {_} {A} {A'} {B} {B'} e g g' P P' = isoToEquiv i
   i : Iso (Σ A B) (Σ A' B')
   Iso.fun i = Σfun f g
   Iso.inv i = Σfun (Iso.inv fi) g'
-  Iso.rightInv i (a' , b') = ΣProp≡ P' (Iso.rightInv fi a')
-  Iso.leftInv i (a , b) = ΣProp≡ P (Iso.leftInv fi a)
+  Iso.rightInv i (a' , b') = Σ≡Prop P' (Iso.rightInv fi a')
+  Iso.leftInv i (a , b) = Σ≡Prop P (Iso.leftInv fi a)
 
 ⊎-×-≃ : ∀ {i j k} {A : Type i} {B : Type j} {C : Type k} → (A ⊎ B) × C ≃ (A × C) ⊎ (B × C)
 ⊎-×-≃ {A = A} {B = B} {C = C} = isoToEquiv (iso f g f-g g-f)
@@ -243,8 +243,8 @@ equivΣProp {_} {_} {A} {A'} {B} {B'} e g g' P P' = isoToEquiv i
   f-g (inl (a , c)) = refl
   f-g (inr (b , c)) = refl
 
-isSet⊎ : ∀ {ℓ ℓ'} {A : Type ℓ} {B : Type ℓ'} → isSet A → isSet B → isSet (A ⊎ B)
-isSet⊎ SA SB = isOfHLevelSum 0 SA SB
+-- isSet⊎ : ∀ {ℓ ℓ'} {A : Type ℓ} {B : Type ℓ'} → isSet A → isSet B → isSet (A ⊎ B)
+-- isSet⊎ SA SB = isOfHLevelSum 0 SA SB
 
 ---
 --- Injections
@@ -326,7 +326,7 @@ inl≃ = isoToEquiv i
   i : Iso A (Σ (A ⊎ B) in-left)
   Iso.fun i a = inl a , is-inl a
   Iso.inv i (_ , l) = get-left l
-  Iso.rightInv i (_ , l) = ΣProp≡ in-left-isProp (inl-get-left l)
+  Iso.rightInv i (_ , l) = Σ≡Prop in-left-isProp (inl-get-left l)
   Iso.leftInv i a = refl
 
 inr≃ : ∀ {ℓ ℓ'} {A : Type ℓ} {B : Type ℓ'} → B ≃ Σ (A ⊎ B) in-right
@@ -335,7 +335,7 @@ inr≃ = isoToEquiv i
   i : Iso B (Σ (A ⊎ B) in-right)
   Iso.fun i b = inr b , is-inr b
   Iso.inv i (_ , r) = get-right r
-  Iso.rightInv i (_ , r) = ΣProp≡ in-right-isProp (inr-get-right r)
+  Iso.rightInv i (_ , r) = Σ≡Prop in-right-isProp (inr-get-right r)
   Iso.leftInv i b = refl
 
 ---
