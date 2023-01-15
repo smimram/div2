@@ -101,16 +101,6 @@ postulate
     PathP (λ i → (a : A i) → B i a) f g
   -- funExtP {A = A} {B = B} {f = f} {g = g} p = toPathP (funExt (λ x → fromPathP {A = (λ i → B i (transp (λ j → A (i ∨ ~ j)) i x))} (p {!toPathP {A = A} {x = (transp (λ j → A (~ j)) i0 x)} {y = x} (transportTransport⁻ (λ i → A i) x)!})))
 
--- transportComposite : {ℓ : Level} {A B C : Type ℓ} (p : A ≡ B) (q : B ≡ C) (x : A) → transport (p ∙ q) x ≡ transport q (transport p x)
--- transportComposite = substComposite (λ X → X)
-
--- -- transporting over (λ i → B (p i) → C (p i)) divides the transport into
--- -- transports over (λ i → C (p i)) and (λ i → B (p (~ i)))
--- funTypeTransp : ∀ {ℓ ℓ'} {A : Type ℓ} (B C : A → Type ℓ') {x y : A} (p : x ≡ y) (f : B x → C x)
-         -- → PathP (λ i → B (p i) → C (p i)) f (subst C p ∘ f ∘ subst B (sym p))
--- funTypeTransp B C {x = x} p f i b =
-  -- transp (λ j → C (p (j ∧ i))) (~ i) (f (transp (λ j → B (p (i ∧ ~ j))) (~ i) b))
-
 -- same as isPropΠ but with implicit arguments
 isPropΠ' : {ℓ ℓ' : Level} {A : Type ℓ} {B : A → Type ℓ'} → (h : (x : A) → isProp (B x)) → isProp ({x : A} → B x)
 isPropΠ' h f g i {x} = h x (f {x}) (g {x}) i
@@ -118,40 +108,6 @@ isPropΠ' h f g i {x} = h x (f {x}) (g {x}) i
 -- a variant of isPropΣ
 isPropΣ' : {ℓ ℓ' : Level} {A : Type ℓ} {B : A → Type ℓ'} → ((x : A) → isProp (B x)) → ((x y : A) → B x → B y → x ≡ y) → isProp (Σ A B)
 isPropΣ' prop eq (a , b) (a' , b') = ΣPathP ((eq _ _ b b') , (toPathP (prop _ _ _)))
-
-
--- -- roughly isHAEquiv.com (snd (equiv→HAEquiv e)) a
--- Equiv-com : {ℓ : Level} {A B : Type ℓ} (e : A ≃ B) (a : A) → cong (equivFun e) (secEq e a) ≡ retEq e (equivFun e a)
--- Equiv-com e a = funExt⁻ (EquivJ (λ A e → cong (equivFun e) ∘ (secEq e) ≡ retEq e ∘ (equivFun e)) refl e) a
-
---- This is in the book, chapter 4
--- postulate
-  -- Equiv-com : {ℓ ℓ' : Level} {A : Type ℓ} {B : Type ℓ'} (e : A ≃ B) (a : A) → cong (equivFun e) (secEq e a) ≡ retEq e (equivFun e a)
-
---- alternative more tractable definition to Σ-cong-equiv-fst (we have an
---- explicit definition for the inverse)
--- Σ-cong-equiv-fst' : {ℓ ℓ' ℓ'' : Level} {A : Type ℓ} {A' : Type ℓ'} {B : A' → Type ℓ''} (e : A ≃ A') → Σ A (B ∘ equivFun e) ≃ Σ A' B
--- Σ-cong-equiv-fst' {_} {_} {_} {A} {A'} {B} e = isoToEquiv i
-  -- where
-  -- i : Iso (Σ A (B ∘ equivFun e)) (Σ A' B)
-  -- Iso.fun i (a , b) = equivFun e a , b
-  -- Iso.inv i (a , b) = invEq e a , subst B (sym (retEq e a)) b
-  -- Iso.rightInv i (a , b) = ΣPathP (retEq e a , toPathP lem)
-    -- where
-    -- lem =
-      -- subst B (retEq e a) (subst B (sym (retEq e a)) b) ≡⟨ sym (substComposite B (sym (retEq e a)) (retEq e a) b) ⟩
-      -- subst B (sym (retEq e a) ∙ retEq e a) b           ≡⟨ cong (λ p → subst B p b) (lCancel (retEq e a)) ⟩
-      -- subst B refl b                                    ≡⟨ substRefl {B = B} b ⟩
-      -- b                                                 ∎
-  -- Iso.leftInv i (a , b) = ΣPathP (secEq e a , (toPathP lem))
-    -- where
-    -- lem =
-      -- subst (B ∘ equivFun e) (secEq e a) (subst B (sym (retEq e (equivFun e a))) b)      ≡⟨ refl ⟩
-      -- subst B (cong (equivFun e) (secEq e a)) (subst B (sym (retEq e (equivFun e a))) b) ≡⟨ sym (substComposite B (sym (retEq e (equivFun e a))) (cong (equivFun e) (secEq e a)) b) ⟩
-      -- subst B (sym (retEq e (equivFun e a)) ∙ cong (equivFun e) (secEq e a)) b           ≡⟨ cong (λ p → subst B (sym (retEq e (equivFun e a)) ∙ p) b) ( Equiv-com e a) ⟩
-      -- subst B (sym (retEq e (equivFun e a)) ∙ retEq e (equivFun e a)) b                  ≡⟨ cong (λ p → subst B p b) (rCancel _) ⟩
-      -- subst B refl b                                                                     ≡⟨ substRefl {B = B} b ⟩
-      -- b                                                                                  ∎
 
 ---
 --- custom elimination principle
@@ -243,8 +199,13 @@ equivΣProp {_} {_} {A} {A'} {B} {B'} e g g' P P' = isoToEquiv i
   f-g (inl (a , c)) = refl
   f-g (inr (b , c)) = refl
 
--- isSet⊎ : ∀ {ℓ ℓ'} {A : Type ℓ} {B : Type ℓ'} → isSet A → isSet B → isSet (A ⊎ B)
--- isSet⊎ SA SB = isOfHLevelSum 0 SA SB
+-- bring back from old cubical library
+Σ-ap :
+  ∀ {ℓ ℓ'} {X X' : Type ℓ} {Y : X → Type ℓ'} {Y' : X' → Type ℓ'}
+  → (isom : X ≡ X')
+  → ((x : X) → Y x ≡ Y' (transport isom x))
+  → (Σ X Y) ≡ (Σ X' Y')
+Σ-ap {X = X} p q = ua (Σ-cong-equiv (pathToEquiv p) (λ x → pathToEquiv (q x)))
 
 ---
 --- Injections

@@ -357,8 +357,8 @@ abstract
   -- because ℤ is searchable)
   -- NB: we need both A to be a set and discrete
   reachable-arr-reveal : {a b : Arrows} → is-reachable-arr a b → reachable-arr a b
-  reachable-arr-reveal {a} {b} r = {!!} -- transport (Σ-ap₁ (ua (invEquiv ℤ≃ℕ)))
-      -- (ℕ.find _ (λ _ → Arrows-isSet _ _) (λ n → Arrows-discrete _ _) (transport (cong ∥_∥₁ (Σ-ap (ua ℤ≃ℕ) (λ n → cong (λ n → arrow (iterate n (fw a)) ≡ b) (sym (funExt⁻ (lem ℤ≃ℕ) n))))) r))
+  reachable-arr-reveal {a} {b} r = transport (Σ-cong-fst (ua (invEquiv ℤ'≃ℕ)))
+      (ℕ.find _ (λ _ → Arrows-isSet _ _) (λ n → Arrows-discrete _ _) (transport (cong ∥_∥₁ (Σ-ap (ua ℤ'≃ℕ) (λ n → cong (λ n → arrow (iterate n (fw a)) ≡ b) (sym (funExt⁻ (lem ℤ'≃ℕ) n))))) r))
     where
     lem : {ℓ : Level} {A : Type ℓ} {B : Type ℓ} (e : A ≃ B) → transport (ua (invEquiv e)) ∘ transport (ua e) ≡ idfun A
     lem {_} {A} {B} e =
@@ -371,12 +371,12 @@ abstract
 
   -- same as above (plus we can test the ends...)
   reachable-reveal : {a b : dArrows} → is-reachable a b → reachable a b
-  reachable-reveal {a} {b} r = {!!} -- transport (Σ-ap₁ (ua (invEquiv ℤ≃ℕ)))
-       -- (ℕ.find _ (λ _ → Ends-isSet _ _) (λ n → Ends-discrete _ _) (transport (cong ∥_∥ (Σ-ap (ua ℤ≃ℕ) (λ n → cong (λ n → iterate n a ≡ b) (sym (funExt⁻ (lem ℤ≃ℕ) n))))) r))
+  reachable-reveal {a} {b} r = transport (Σ-cong-fst (ua (invEquiv ℤ'≃ℕ)))
+       (ℕ.find _ (λ _ → Ends-isSet _ _) (λ n → Ends-discrete _ _) (transport (cong ∥_∥₁ (Σ-ap (ua ℤ'≃ℕ) (λ n → cong (λ n → iterate n a ≡ b) (sym (funExt⁻ (lem ℤ'≃ℕ) n))))) r))
     where
     lem : {ℓ : Level} {A : Type ℓ} {B : Type ℓ} (e : A ≃ B) → transport (ua (invEquiv e)) ∘ transport (ua e) ≡ idfun A
     lem {_} {A} {B} e =
-      transport (ua (invEquiv e)) ∘ transport (ua e) ≡⟨ {!funExt (λ x → sym (transportComposite (ua e) (ua (invEquiv e)) x))!} ⟩
+      transport (ua (invEquiv e)) ∘ transport (ua e) ≡⟨ funExt (λ x → sym (transportComposite (ua e) (ua (invEquiv e)) x)) ⟩
       transport (ua e ∙ ua (invEquiv e))             ≡⟨ cong transport (sym (uaCompEquiv e (invEquiv e))) ⟩
       transport (ua (compEquiv e (invEquiv e)))      ≡⟨ cong (transport ∘ ua) (invEquiv-is-rinv e) ⟩
       transport (ua (idEquiv A))                     ≡⟨ cong transport uaIdEquiv ⟩
