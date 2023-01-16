@@ -25,13 +25,13 @@ open import Cubical.HITs.SetQuotients as []
 
 open import Ends
 
-module Div2 {ℓ} {A B : Type ℓ} (SA : isSet A) (SB : isSet B) (isom : A × End ≃ B × End) where
+module Div2 {ℓ} {A B : Type ℓ} (DA : Discrete A) (DB : Discrete B) (isom : A × End ≃ B × End) where
 
-open import Arrows SA SB isom
-open import Bracketing SA SB isom
-open import Switch SA SB isom
-open import Swapper SA SB isom
-open import Tricho SA SB isom
+open import Arrows DA DB isom
+open import Bracketing DA DB isom
+open import Switch DA DB isom
+open import Swapper DA DB isom
+open import Tricho DA DB isom
 
 ---
 --- The bijection

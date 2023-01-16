@@ -9,17 +9,18 @@ open import Cubical.Foundations.Univalence
 open import Cubical.Data.Empty as ⊥
 open import Cubical.Data.Sum
 open import Cubical.Data.Sigma
+open import Cubical.Relation.Nullary
 open import Cubical.HITs.PropositionalTruncation as ∥∥
 open import Cubical.HITs.SetQuotients as []
 open import Misc
 open import Ends
 
-module Tricho {ℓ} {A B : Type ℓ} (SA : isSet A) (SB : isSet B) (isom : A × End ≃ B × End) where
+module Tricho {ℓ} {A B : Type ℓ} (DA : Discrete A) (DB : Discrete B) (isom : A × End ≃ B × End) where
 
-open import Arrows SA SB isom
-open import Bracketing SA SB isom
-open import Switch SA SB isom
-open import Swapper SA SB isom
+open import Arrows DA DB isom
+open import Bracketing DA DB isom
+open import Switch DA DB isom
+open import Swapper DA DB isom
 
 ---
 --- The trichotomy
@@ -55,8 +56,6 @@ abstract
       Iso.leftInv i (wb x) = refl
       Iso.leftInv i (sw x) = refl
       Iso.leftInv i (sl x) = refl
-
-open import Classical
 
 tricho : (c : Chains) → Tricho c
 tricho c = [].elim Tricho-isSet T T≡ c

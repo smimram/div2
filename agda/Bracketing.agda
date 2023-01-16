@@ -23,9 +23,9 @@ open import Cubical.HITs.SetQuotients as []
 
 open import Ends
 
-module Bracketing {ℓ} {A B : Type ℓ} (SA : isSet A) (SB : isSet B) (isom : A × End ≃ B × End) where
+module Bracketing {ℓ} {A B : Type ℓ} (DA : Discrete A) (DB : Discrete B) (isom : A × End ≃ B × End) where
 
-open import Arrows SA SB isom
+open import Arrows DA DB isom
 
 ---
 --- Well-bracketed chains

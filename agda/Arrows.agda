@@ -26,25 +26,21 @@ open import Misc
 
 open import Ends
 
-module Arrows {ℓ} {A B : Type ℓ} (SA : isSet A) (SB : isSet B) (isom : A × End ≃ B × End) where
+module Arrows {ℓ} {A B : Type ℓ} (DA : Discrete A) (DB : Discrete B) (isom : A × End ≃ B × End) where
 
 open import ArrowsBase isom public
 
+A-discrete = DA
+B-discrete = DB
+
+SA : isSet A
+SA = Discrete→isSet DA
+
+SB : isSet B
+SB = Discrete→isSet DB
+
 Arrows-isSet : isSet Arrows
 Arrows-isSet = isSet⊎ SA SB
-
--- this is only used for discreteness of A and B
-open import Classical
-
-A-discrete : Discrete A
-A-discrete x y with LEM (SA x y)
-... | inl x≡y = yes x≡y
-... | inr x≢y = no  x≢y
-
-B-discrete : Discrete B
-B-discrete x y with LEM (SB x y)
-... | inl x≡y = yes x≡y
-... | inr x≢y = no  x≢y
 
 Arrows-discrete : Discrete Arrows
 Arrows-discrete = Discrete⊎ A-discrete B-discrete
