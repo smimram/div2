@@ -371,3 +371,21 @@ Discrete× DA DB (a , b) (a' , b') with DA a a' | DB b b'
 ... | yes p | yes q = yes (ΣPathP (p , q))
 ... | yes p | no ¬q = no (¬q ∘ cong snd)
 ... | no ¬p | _ = no (¬p ∘ cong fst)
+
+---
+--- Decidability
+---
+
+Dec× : {ℓ ℓ' : Level} {A : Type ℓ} {B : Type ℓ'} → Dec A → Dec B → Dec (A × B)
+Dec× (yes a) (yes b) = yes (a , b)
+Dec× (yes a) (no ¬b) = no λ { (_ , b) → ¬b b}
+Dec× (no ¬a) (yes b) = no λ { (a , _) → ¬a a}
+Dec× (no ¬a) (no ¬b) = no λ { (a , b) → ¬a a}
+
+Dec¬ : {ℓ : Level} {A : Type ℓ} → Dec A → Dec (¬ A)
+Dec¬ (yes a) = no λ ¬a → ¬a a
+Dec¬ (no ¬a) = yes λ a → ¬a a
+
+DEC→NNE : {ℓ : Level} {A : Type ℓ} → Dec A → ¬ ¬ A → A
+DEC→NNE (yes a) ¬¬a = a
+DEC→NNE (no ¬a) ¬¬a = ⊥.elim (¬¬a ¬a)

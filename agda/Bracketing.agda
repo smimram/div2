@@ -98,13 +98,21 @@ abstract
  -- (fst (height n x) ℕ.+ fst (weight (next (iterate (fromℕ n) x)))) ℕ.+ (snd (height n x) ℕ.+ snd (weight (next (iterate (fromℕ n) x)))) ≡⟨ {!!} ⟩
  -- suc (suc n) ∎
 
--- an arrow admits a matching arrow
-matched : Arrows → Type₀
-matched x = Σ ℕ (λ n →
+matched-at : Arrows → ℕ → Type₀
+matched-at x n =
   -- we take suc n to avoid considering the empty path as a match
   (height (suc n) (fw x) ≡ ℤ.zero) ×
   ((k : ℕ) → k < (suc n) → ¬ (height k (fw x) ≡ ℤ.zero))
-  )
+
+matched-at-isProp : (x : Arrows) (n : ℕ) → isProp (matched-at x n)
+matched-at-isProp x n = isProp× (ℤ-isSet _ _) (isPropΠ (λ k → isProp→ (isProp¬ _)))
+
+matched-at-isDec : (x : Arrows) (n : ℕ) → Dec (matched-at x n)
+matched-at-isDec x n = Dec× (ℤ.discrete _ _) {!!} -- we can test a decidable property on a finite nnumber of values of k (by induction on n)
+
+-- an arrow admits a matching arrow
+matched : Arrows → Type₀
+matched x = Σ ℕ (matched-at x)
 
 matched-isProp : (x : Arrows) → isProp (matched x)
 matched-isProp x (n , z , p) (n' , z' , p') = ΣPathP (n≡n' , toPathP (ΣPathP (ℤ-isSet _ _ _ _ , isPropΠ3 (λ _ _ _ → isProp⊥) _ _)))
@@ -114,6 +122,10 @@ matched-isProp x (n , z , p) (n' , z' , p') = ΣPathP (n≡n' , toPathP (ΣPathP
   ... | lt n<n' = ⊥.elim (p' (suc n) (suc-≤-suc n<n') z)
   ... | eq n≡n' = n≡n'
   ... | gt n'<n = ⊥.elim (p (suc n') (suc-≤-suc n'<n) z')
+
+matched-isDec : (a : Arrows) → Dec (matched a)
+matched-isDec a = DecΣℕ (matched-at a) (matched-at-isDec a)
+  where open import LPO
 
 -- matching end
 match-end : {a : Arrows} → matched a → Ends

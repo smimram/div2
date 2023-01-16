@@ -44,6 +44,9 @@ switch a =
     ((k : ℕ) → suc k < n → matched (arrow (iterate (fromℕ (suc k)) (bw a))))
    )
 
+switch-isDec : (a : Arrows) → Dec (switch a)
+switch-isDec a = Dec× {!Dec¬ ?!} {!!}
+
 switch-isProp : (a : Arrows) → isProp (switch a)
 switch-isProp a (m , n , e , b , l) (m' , n' , e' , b' , l') i =
   isPropΠ (λ _ → isProp⊥) m m' i ,
@@ -75,14 +78,19 @@ switch-isProp a (m , n , e , b , l) (m' , n' , e' , b' , l') i =
   l≡l' : PathP (λ i → ((k : ℕ) → suc k < n≡n' i → matched (arrow (iterate (fromℕ (suc k)) (bw a))))) l l'
   l≡l' = toPathP (isPropΠ2 (λ k _ → matched-isProp (arrow (iterate (fromℕ (suc k)) (bw a)))) _ _)
 
+switched-end-at : dArrows → ℤ → Type ℓ
+switched-end-at e₀ n =
+  let e = iterate n e₀ in
+  -- we have to suppose that this is left, otherwise we have two witnesses
+  -- (one in A, one in B) and we don't have a proposition anymore
+  in-left (arrow e) × switch (arrow e)
+
+switched-end-at-isDec : (a : dArrows) (n : ℤ) → Dec (switched-end-at a n)
+switched-end-at-isDec a n = Dec× {!!} {!!}
+
 -- the chain of an arrow is switched
 switched-end : dArrows → Type ℓ
-switched-end e₀ = Σ ℤ (λ n →
-  let e = iterate n e₀ in
-    -- we have to suppose that this is left, otherwise we have two witnesses
-    -- (one in A, one in B) and we don't have a proposition anymore
-    in-left (arrow e) × switch (arrow e)
-  )
+switched-end e₀ = Σ ℤ (switched-end-at e₀)
 
 -- being switched is a proposition
 switched-end-isProp : (a : dArrows) → isProp (switched-end a)
@@ -165,7 +173,7 @@ switched-chain-hProp : Chains → hProp ℓ
 switched-chain-hProp c = [].elim (λ _ → isSetHProp) (λ a → switched a , switched-isProp a) indep c
   where
   abstract
-    indep : (a b : Arrows) (r : is-reachable-arr a b) → (switched a , switched-isProp a) ≡ (switched b , switched-isProp b)
+    indep : (a b : Arrows) (r : is-reachable-arr a b) → _≡_ {A = hProp ℓ} (switched a , switched-isProp a) (switched b , switched-isProp b)
     indep = (λ a b r → Σ≡Prop (λ _ → isPropIsProp) (switched-indep (reachable-arr-reveal r)))
 
 switched-chain : Chains → Type ℓ
@@ -248,7 +256,7 @@ sequential-chain-hP : Chains → hProp ℓ-zero
 sequential-chain-hP c = [].elim (λ _ → isSetHProp) (λ a → sequential (fw a) , sequential-isProp _) indep c
   where
   abstract
-    indep : (a b : Arrows) (r : is-reachable-arr a b) → (sequential (fw a) , sequential-isProp (fw a)) ≡ (sequential (fw b) , sequential-isProp (fw b))
+    indep : (a b : Arrows) (r : is-reachable-arr a b) → _≡_ {A = hProp ℓ-zero} (sequential (fw a) , sequential-isProp (fw a)) (sequential (fw b) , sequential-isProp (fw b))
     indep a b r = Σ≡Prop (λ _ → isPropIsProp) (ua (isoToEquiv i))
       where
         i : Iso (sequential (fw a)) (sequential (fw b))
@@ -339,7 +347,7 @@ non-matched-chain-hP : Chains → hProp ℓ-zero
 non-matched-chain-hP c = [].elim (λ _ → isSetHProp) (λ a → is-non-matched (fw a) , is-non-matched-isProp (fw a)) indep c
   where
   abstract
-    indep : (a b : Arrows) (r : is-reachable-arr a b) → (is-non-matched (fw a) , is-non-matched-isProp (fw a)) ≡ (is-non-matched (fw b) , is-non-matched-isProp (fw b))
+    indep : (a b : Arrows) (r : is-reachable-arr a b) → _≡_ {A = hProp ℓ-zero} (is-non-matched (fw a) , is-non-matched-isProp (fw a)) (is-non-matched (fw b) , is-non-matched-isProp (fw b))
     indep a b r = Σ≡Prop (λ _ → isPropIsProp) (ua (isoToEquiv i))
       where
       i : Iso (is-non-matched (fw a)) (is-non-matched (fw b))
