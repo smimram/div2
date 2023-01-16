@@ -166,6 +166,7 @@ switched-chain-hProp : Chains → hProp ℓ
 switched-chain-hProp c = [].elim (λ _ → isSetHProp) (λ a → switched a , switched-isProp a) indep c
   where
   abstract
+    indep : (a b : Arrows) (r : is-reachable-arr a b) → (switched a , switched-isProp a) ≡ (switched b , switched-isProp b)
     indep = (λ a b r → Σ≡Prop (λ _ → isPropIsProp) (switched-indep (reachable-arr-reveal r)))
 
 switched-chain : Chains → Type ℓ
@@ -314,6 +315,7 @@ non-matched-indep : {a b : dArrows} (r : reachable a b) → non-matched b → no
 non-matched-indep {a} (n , r) (m , nm) = n ℤ.+ m , N
   where
   abstract
+    N : ¬ matched (arrow (iterate (n ℤ.+ m) a))
     N = λ im → nm (subst (matched ∘ fst) (sym (iterate-+ n m a) ∙ cong (iterate m) r) im )
 
 non-matched-op : (a : dArrows) → non-matched (op a) ≡ non-matched a

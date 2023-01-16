@@ -213,6 +213,7 @@ reachable→reachable-arr {a , src} {e'} (n , r) = n , cong arrow r
 reachable→reachable-arr e@{a , tgt} {e'} (n , r) = ℤ.neg n , p
   where
   abstract
+    p : arrow (iterate (neg n) (fw (arrow e))) ≡ arrow e'
     p =
       arrow (iterate (ℤ.neg n) (fw (arrow (a , tgt)))) ≡⟨ cong arrow (iterate-op (ℤ.neg n) e) ⟩
       arrow (op (iterate (ℤ.neg (ℤ.neg n)) e))         ≡⟨ cong (λ n → arrow (op (iterate n e))) (ℤ.neg-neg n) ⟩
@@ -547,6 +548,7 @@ elements→delements : {o : Arrows} → elements [ o ] → delements [ fw o ]
 elements→delements {o} a = element-end a , p
   where
   abstract
+    p : [ element-end a ] ≡ [ fw o ]
     p = sym (eq/ _ _ ∣ element-end-reachable-arr a ∣₁)
 
 -- -- directing an element preserves the underlying arrow

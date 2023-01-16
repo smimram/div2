@@ -457,7 +457,7 @@ slope-swapper {c} = [].elim
       where
       p : (nm : non-matched (fw o')) →
           subst chain-A≃B oo' (equiv (subst sequential-chain (sym oo') seq) (subst non-matched-chain (sym oo') ∣ nm ∣₁)) .fst ≡ equiv seq ∣ nm ∣₁ .fst
-      p nm = {!!}
+      p nm = {!!} -- TODO: disabled for now since Agda does not typecheck in a reasonable amount of time in latest versions
         -- let seq' : sequential-chain [ o ]
             -- seq' = subst sequential-chain (sym oo') seq
             -- nm' : non-matched-chain [ o ]

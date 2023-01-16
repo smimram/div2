@@ -264,6 +264,7 @@ well-bracketed-chain-hProp : (c : Chains) → hProp ℓ-zero
 well-bracketed-chain-hProp c = [].elim (λ _ → isSetHProp) (λ a → well-bracketed a , well-bracketed-isProp a) indep c
   where
   abstract
+    indep : (a b : Arrows) (r : is-reachable-arr a b) → _≡_ {A = hProp ℓ-zero} (well-bracketed a , well-bracketed-isProp a) (well-bracketed b , well-bracketed-isProp b)
     indep = (λ a b r → Σ≡Prop (λ _ → isPropIsProp) (well-bracketed-indep a b (reachable-arr-reveal r)))
 
 -- the chain of an arrow is well-bracketed

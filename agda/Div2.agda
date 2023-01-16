@@ -48,9 +48,9 @@ bij-by-chain : {ℓ ℓ' ℓ'' : Level} {A : Type ℓ} {B : Type ℓ'}
 bij-by-chain {A = A} {B = B} R b =
   A                                                        ≃⟨ inl≃ ⟩
   Σ (A ⊎ B) in-left                                        ≃⟨ invEquiv (Σ-cong-equiv-fst (invEquiv (partition R))) ⟩
-  Σ (Σ ((A ⊎ B) / R) (fiber [_])) (in-left ∘ fst ∘ snd)    ≃⟨ assocΣ ⟩
-  Σ ((A ⊎ B) / R) (λ x → Σ (fiber [_] x) (in-left ∘ fst))  ≃⟨ congΣEquiv b ⟩
-  Σ ((A ⊎ B) / R) (λ x → Σ (fiber [_] x) (in-right ∘ fst)) ≃⟨ invEquiv assocΣ ⟩
+  Σ (Σ ((A ⊎ B) / R) (fiber [_])) (in-left ∘ fst ∘ snd)    ≃⟨ Σ-assoc-≃ ⟩
+  Σ ((A ⊎ B) / R) (λ x → Σ (fiber [_] x) (in-left ∘ fst))  ≃⟨ Σ-cong-equiv-snd b ⟩
+  Σ ((A ⊎ B) / R) (λ x → Σ (fiber [_] x) (in-right ∘ fst)) ≃⟨ invEquiv Σ-assoc-≃ ⟩
   Σ (Σ ((A ⊎ B) / R) (fiber [_])) (in-right ∘ fst ∘ snd)   ≃⟨ Σ-cong-equiv-fst (invEquiv (partition R)) ⟩
   Σ (A ⊎ B) in-right                                       ≃⟨ invEquiv inr≃ ⟩
   B                                                        ■
