@@ -10,7 +10,6 @@ open import Cubical.Foundations.HLevels
 open import Cubical.Foundations.Univalence
 open import Cubical.Data.Sigma
 open import Cubical.Relation.Nullary
-open import Cubical.Relation.Nullary.DecidableEq
 open import Cubical.Relation.Binary
 open BinaryRelation
 open import Cubical.HITs.PropositionalTruncation
@@ -34,10 +33,8 @@ partition {A = A} R = isoToEquiv i
   -- Iso.rightInv i ([a] , (a , p) , b) = ΣPathP (p , toPathP (ΣPathP (ΣPathP ((transportRefl a) , (toPathP (squash/ _ _ _ p))) , (toPathP {!refl!}))))
   -- Iso.leftInv i (a , b) = refl
 
-open import Sigma
-
 partitionΣ : {ℓ ℓ' ℓ'' : Level} {A : Type ℓ} {B : A → Type ℓ'} (R : A → A → Type ℓ'') → Σ A B ≃ Σ (A / R) (λ x → Σ (fiber [_] x) (B ∘ fst))
 partitionΣ {A = A} {B = B} R =
   Σ A B ≃⟨ invEquiv (Σ-cong-equiv-fst (invEquiv (partition R))) ⟩
-  Σ (Σ (A / R) (fiber [_])) (B ∘ fst ∘ snd) ≃⟨ assocΣ ⟩
+  Σ (Σ (A / R) (fiber [_])) (B ∘ fst ∘ snd) ≃⟨ Σ-assoc-≃ ⟩
   Σ (A / R) (λ x → Σ (fiber [_] x) (B ∘ fst)) ■

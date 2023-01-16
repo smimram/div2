@@ -67,7 +67,7 @@ tricho c = [].elim Tricho-isSet T T≡ c
   ... | inr ¬wb with LEM (switched-isProp a)
   ... | inl issw = sw issw
   ... | inr ¬sw = sl (¬switched⇒sequential a ¬sw , (¬∀⇒∃¬ (λ _ → matched-isProp _) ¬wb))
-  T≡ : (a b : Arrows) (r : ∥ reachable-arr a b ∥) → PathP (λ i → Tricho (eq/ a b r i)) (T a) (T b)
+  T≡ : (a b : Arrows) (r : ∥ reachable-arr a b ∥₁) → PathP (λ i → Tricho (eq/ a b r i)) (T a) (T b)
   T≡ a b r with LEM (well-bracketed-isProp a) | LEM (well-bracketed-isProp b)
   ... | inl awb | inl bwb = toPathP (cong wb (well-bracketed-chain-isProp [ b ] _ bwb))
   ... | inl awb | inr b¬wb = ⊥.rec (b¬wb (transport (well-bracketed-indep a b (reachable-arr-reveal r)) awb))

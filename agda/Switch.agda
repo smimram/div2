@@ -7,18 +7,16 @@ open import Cubical.Foundations.Equiv
 open import Cubical.Foundations.HLevels
 open import Cubical.Foundations.Univalence
 open import Cubical.Relation.Nullary
-open import Cubical.Relation.Nullary.DecidableEq
 open import Cubical.Relation.Binary
 open import Cubical.Data.Empty as ⊥
 open import Cubical.Data.Unit renaming (Unit to ⊤)
 open import Cubical.Data.Sum
 open import Cubical.Data.Sigma
 open import Z as ℤ hiding (_<_ ; _≤_ ; _≟_)
-open import Cubical.Data.Nat as ℕ
+open import Cubical.Data.Nat as ℕ hiding (isZero)
 open import Cubical.Data.Nat.Order
-open import Nat as ℕ
+open import Nat as ℕ hiding (isZero)
 open import Misc
-open import Sigma
 open import Cubical.HITs.PropositionalTruncation as ∥∥
 open import Cubical.HITs.SetQuotients as []
 
@@ -113,14 +111,14 @@ switched-end-indep {a} {b} (nr , r) = ua (isoToEquiv i)
         iterate n b              ≡⟨ cong (iterate n) (sym r) ⟩
         iterate n (iterate nr a) ≡⟨ iterate-+ nr n a ⟩
         iterate (nr ℤ.+ n) a     ∎
-  Iso.rightInv i (n , l , s) = ΣProp≡ (λ _ → isProp× (in-left-isProp _) (switch-isProp _)) p
+  Iso.rightInv i (n , l , s) = Σ≡Prop (λ _ → isProp× (in-left-isProp _) (switch-isProp _)) p
     where
       p =
         ℤ.neg nr ℤ.+ (nr ℤ.+ n) ≡⟨ ℤ.+-assoc (ℤ.neg nr) _ _ ⟩
         (ℤ.neg nr ℤ.+ nr) ℤ.+ n ≡⟨ cong₂ ℤ._+_ (neg+≡0 nr) refl ⟩
         ℤ.zero ℤ.+ n            ≡⟨ ℤ.zero-+ n ⟩
         n                       ∎
-  Iso.leftInv i (n , l , s) = ΣProp≡ (λ _ → isProp× (in-left-isProp _) (switch-isProp _)) p
+  Iso.leftInv i (n , l , s) = Σ≡Prop (λ _ → isProp× (in-left-isProp _) (switch-isProp _)) p
     where
       p =
         nr ℤ.+ (ℤ.neg nr ℤ.+ n) ≡⟨ ℤ.+-assoc nr _ _ ⟩
@@ -139,14 +137,14 @@ switched-end-op a = ua (isoToEquiv i)
   i : Iso (switched-end (op a)) (switched-end a)
   Iso.fun i = F a
   Iso.inv i s = F (op a) (subst switched-end (sym (op-op a)) s)
-  Iso.rightInv i (n , l , s) = ΣProp≡ (λ _ → isProp× (in-left-isProp _) (switch-isProp _)) (ℤ.neg-neg n)
-  Iso.leftInv i (n , l , s) = ΣProp≡ (λ _ → isProp× (in-left-isProp _) (switch-isProp _)) (ℤ.neg-neg n)
+  Iso.rightInv i (n , l , s) = Σ≡Prop (λ _ → isProp× (in-left-isProp _) (switch-isProp _)) (ℤ.neg-neg n)
+  Iso.leftInv i (n , l , s) = Σ≡Prop (λ _ → isProp× (in-left-isProp _) (switch-isProp _)) (ℤ.neg-neg n)
 
 switched-end-chain : dChains → Type ℓ
 switched-end-chain c = fst T
   where
   T : hProp ℓ
-  T = [].elim (λ _ → isSetHProp) (λ a → switched-end a , switched-end-isProp a) (λ a b r → ΣProp≡ (λ _ → isPropIsProp) (switched-end-indep (reachable-reveal r))) c
+  T = [].elim (λ _ → isSetHProp) (λ a → switched-end a , switched-end-isProp a) (λ a b r → Σ≡Prop (λ _ → isPropIsProp) (switched-end-indep (reachable-reveal r))) c
 
 switched : Arrows → Type ℓ
 switched a = switched-end (fw a)
@@ -167,7 +165,8 @@ switched-chain-hProp : Chains → hProp ℓ
 switched-chain-hProp c = [].elim (λ _ → isSetHProp) (λ a → switched a , switched-isProp a) indep c
   where
   abstract
-    indep = (λ a b r → ΣProp≡ (λ _ → isPropIsProp) (switched-indep (reachable-arr-reveal r)))
+    indep : (a b : Arrows) (r : is-reachable-arr a b) → (switched a , switched-isProp a) ≡ (switched b , switched-isProp b)
+    indep = (λ a b r → Σ≡Prop (λ _ → isPropIsProp) (switched-indep (reachable-arr-reveal r)))
 
 switched-chain : Chains → Type ℓ
 switched-chain c = fst (switched-chain-hProp c)
@@ -179,7 +178,7 @@ switched-chain-isProp c = snd (switched-chain-hProp c)
 switched-element : (c : Chains) → switched-chain c → elements c
 -- switched-element c sw = [].elim (λ c → elements-isSet c) (λ a → {!!}) (λ a b r → toPathP {!!}) c
 switched-element c = [].elim
-  { B = λ c → switched-chain c → elements c }
+  {P = λ c → switched-chain c → elements c}
   (λ c → isSetΠ (λ _ → elements-isSet c))
   el
   el-indep
@@ -187,10 +186,10 @@ switched-element c = [].elim
   where
     -- the element
     el : (a : Arrows) → switched-chain [ a ] → elements [ a ]
-    el a (n , _) = arrow (iterate n (fw a)) , sym (eq/ _ _ ∣ n , refl ∣)
+    el a (n , _) = arrow (iterate n (fw a)) , sym (eq/ _ _ ∣ n , refl ∣₁)
     -- the choice of the element is inependent of the fwing point
     el-indep : (a b : Arrows) (r : is-reachable-arr a b) → PathP (λ i → switched-chain (eq/ a b r i) → elements (eq/ a b r i)) (el a) (el b)
-    el-indep a b r = toPathP (funExt (λ sw → ΣProp≡ (λ _ → Chains-isSet _ _) (p sw)))
+    el-indep a b r = toPathP (funExt (λ sw → Σ≡Prop (λ _ → Chains-isSet _ _) (p sw)))
       where
       p = λ (sw : switched-chain [ b ]) →
          transport (λ i → Arrows) (fst (el a (subst switched-chain (sym (eq/ a b r)) sw))) ≡⟨ transportRefl _ ⟩
@@ -250,7 +249,7 @@ sequential-chain-hP c = [].elim (λ _ → isSetHProp) (λ a → sequential (fw a
   where
   abstract
     indep : (a b : Arrows) (r : is-reachable-arr a b) → (sequential (fw a) , sequential-isProp (fw a)) ≡ (sequential (fw b) , sequential-isProp (fw b))
-    indep a b r = ΣProp≡ (λ _ → isPropIsProp) (ua (isoToEquiv i))
+    indep a b r = Σ≡Prop (λ _ → isPropIsProp) (ua (isoToEquiv i))
       where
         i : Iso (sequential (fw a)) (sequential (fw b))
         i = iso h k sec ret
@@ -315,6 +314,7 @@ non-matched-indep : {a b : dArrows} (r : reachable a b) → non-matched b → no
 non-matched-indep {a} (n , r) (m , nm) = n ℤ.+ m , N
   where
   abstract
+    N : ¬ matched (arrow (iterate (n ℤ.+ m) a))
     N = λ im → nm (subst (matched ∘ fst) (sym (iterate-+ n m a) ∙ cong (iterate m) r) im )
 
 non-matched-op : (a : dArrows) → non-matched (op a) ≡ non-matched a
@@ -323,30 +323,30 @@ non-matched-op a = ua (isoToEquiv i)
   i : Iso (non-matched (op a)) (non-matched a)
   Iso.fun i (n , r) = ℤ.neg n , (λ m → r (subst (matched ∘ fst) (sym (iterate-op n a)) m))
   Iso.inv i (n , r) = ℤ.neg n , (λ m → r (subst (matched ∘ fst) (sym (iterate-op n (op a)) ∙ cong (iterate n) (op-op a)) m))
-  Iso.rightInv i (n , r) = ΣProp≡ (λ _ → isProp¬ _) (ℤ.neg-neg n)
-  Iso.leftInv i (n , r) = ΣProp≡ (λ _ → isProp¬ _) (ℤ.neg-neg n)
+  Iso.rightInv i (n , r) = Σ≡Prop (λ _ → isProp¬ _) (ℤ.neg-neg n)
+  Iso.leftInv i (n , r) = Σ≡Prop (λ _ → isProp¬ _) (ℤ.neg-neg n)
 
 non-matched-indep² : {a b : dArrows} (r : reachable a b) (nm : non-matched b) → non-matched-indep (reachable-sym r) (non-matched-indep r nm) ≡ nm
-non-matched-indep² (n , r) (m , nm) = ΣProp≡ (λ _ → isProp¬ _) (ℤ.+-assoc (ℤ.neg n) n m ∙ cong (λ k → k ℤ.+ m) (ℤ.neg+≡0 n) ∙ ℤ.zero-+ m)
+non-matched-indep² (n , r) (m , nm) = Σ≡Prop (λ _ → isProp¬ _) (ℤ.+-assoc (ℤ.neg n) n m ∙ cong (λ k → k ℤ.+ m) (ℤ.neg+≡0 n) ∙ ℤ.zero-+ m)
 
 is-non-matched : dArrows → Type₀
-is-non-matched a = ∥ non-matched a ∥
+is-non-matched a = ∥ non-matched a ∥₁
 
 is-non-matched-isProp : (a : dArrows) → isProp (is-non-matched a)
-is-non-matched-isProp a = propTruncIsProp
+is-non-matched-isProp a = isPropPropTrunc
 
 non-matched-chain-hP : Chains → hProp ℓ-zero
 non-matched-chain-hP c = [].elim (λ _ → isSetHProp) (λ a → is-non-matched (fw a) , is-non-matched-isProp (fw a)) indep c
   where
   abstract
     indep : (a b : Arrows) (r : is-reachable-arr a b) → (is-non-matched (fw a) , is-non-matched-isProp (fw a)) ≡ (is-non-matched (fw b) , is-non-matched-isProp (fw b))
-    indep a b r = ΣProp≡ (λ _ → isPropIsProp) (ua (isoToEquiv i))
+    indep a b r = Σ≡Prop (λ _ → isPropIsProp) (ua (isoToEquiv i))
       where
       i : Iso (is-non-matched (fw a)) (is-non-matched (fw b))
       i = iso h k sec ret
         where
         h : is-non-matched (fw a) → is-non-matched (fw b)
-        h ¬a = ∣ {!!} , {!!} ∣ -- the goal type
+        h ¬a = ∣ {!!} , {!!} ∣₁ -- the goal type
         --is a proposition so we can eliminate r to obtain an integer j for which iterate j (fw b) = a.
         --we can also eliminate ¬a for the same reason. we get then an integer i such that
         --¬ matched (arrow (iterate i (fw a)))  
@@ -354,7 +354,7 @@ non-matched-chain-hP c = [].elim (λ _ → isSetHProp) (λ a → is-non-matched 
         --hence a proof of ¬ matched (arrow (iterate (i+j) (fw b)) because iterate is an action
         --so we can fill the first hole with (i + j) and the second one with with the proof we obtained.
         k : is-non-matched (fw b) → is-non-matched (fw a)
-        k ¬b = ∣ {!!} , {!!} ∣ --same as above
+        k ¬b = ∣ {!!} , {!!} ∣₁ --same as above
         sec : section h k
         sec = {!!}  --is-non-matched is a prop so trivial
         ret : retract h k

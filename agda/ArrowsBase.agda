@@ -24,10 +24,10 @@ g : B × End → A × End
 g = invEq isom
 
 g-f : (x : A × End) → g (f x) ≡ x
-g-f = secEq isom
+g-f = retEq isom
 
 f-g : (x : B × End) → f (g x) ≡ x
-f-g = retEq isom
+f-g = secEq isom
 
 Arrows : Type ℓ
 Arrows = A ⊎ B
@@ -108,7 +108,7 @@ reachable : dArrows → dArrows → Type ℓ
 reachable e e' = Σ ℤ (λ n → iterate n e ≡ e')
 
 is-reachable : dArrows → dArrows → Type ℓ
-is-reachable e e' = ∥ reachable e e' ∥
+is-reachable e e' = ∥ reachable e e' ∥₁
 
 ---
 --- Chains

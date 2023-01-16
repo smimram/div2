@@ -10,7 +10,6 @@ open import Cubical.Foundations.Univalence
 open import Cubical.Foundations.Transport
 open import Cubical.Foundations.GroupoidLaws
 open import Cubical.Relation.Nullary
-open import Cubical.Relation.Nullary.DecidableEq
 open import Cubical.Relation.Binary
 open import Cubical.Data.Empty as ⊥
 open import Cubical.Data.Unit renaming (Unit to ⊤)
@@ -39,7 +38,6 @@ open import Tricho SA SB isom
 ---
 
 open import Partition
-open import Sigma
 
 -- we can create an equivalence between A and B by doing so on each chain
 bij-by-chain : {ℓ ℓ' ℓ'' : Level} {A : Type ℓ} {B : Type ℓ'}
@@ -49,9 +47,9 @@ bij-by-chain : {ℓ ℓ' ℓ'' : Level} {A : Type ℓ} {B : Type ℓ'}
 bij-by-chain {A = A} {B = B} R b =
   A                                                        ≃⟨ inl≃ ⟩
   Σ (A ⊎ B) in-left                                        ≃⟨ invEquiv (Σ-cong-equiv-fst (invEquiv (partition R))) ⟩
-  Σ (Σ ((A ⊎ B) / R) (fiber [_])) (in-left ∘ fst ∘ snd)    ≃⟨ assocΣ ⟩
-  Σ ((A ⊎ B) / R) (λ x → Σ (fiber [_] x) (in-left ∘ fst))  ≃⟨ congΣEquiv b ⟩
-  Σ ((A ⊎ B) / R) (λ x → Σ (fiber [_] x) (in-right ∘ fst)) ≃⟨ invEquiv assocΣ ⟩
+  Σ (Σ ((A ⊎ B) / R) (fiber [_])) (in-left ∘ fst ∘ snd)    ≃⟨ Σ-assoc-≃ ⟩
+  Σ ((A ⊎ B) / R) (λ x → Σ (fiber [_] x) (in-left ∘ fst))  ≃⟨ Σ-cong-equiv-snd b ⟩
+  Σ ((A ⊎ B) / R) (λ x → Σ (fiber [_] x) (in-right ∘ fst)) ≃⟨ invEquiv Σ-assoc-≃ ⟩
   Σ (Σ ((A ⊎ B) / R) (fiber [_])) (in-right ∘ fst ∘ snd)   ≃⟨ Σ-cong-equiv-fst (invEquiv (partition R)) ⟩
   Σ (A ⊎ B) in-right                                       ≃⟨ invEquiv inr≃ ⟩
   B                                                        ■

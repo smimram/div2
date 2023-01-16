@@ -8,32 +8,14 @@ open import Cubical.Data.Nat as ℕ using (ℕ)
 open import Cubical.Data.Nat.Order as ℕ using ()
 open import Cubical.Data.Sigma
 open import Cubical.Relation.Nullary
-open import Cubical.Relation.Nullary.DecidableEq
-
-data ℤ : Type₀  where
-  zero  : ℤ
-  suc   : ℤ → ℤ
-  predl : ℤ → ℤ
-  predr : ℤ → ℤ
-  predl-suc : (z : ℤ) → predl (suc z) ≡ z
-  suc-predr : (z : ℤ) → suc (predr z) ≡ z
-
-pred = predl
-pred-suc = predl-suc
+-- TODO: use addition, negation and subtraction from the standard library
+open import Cubical.Data.Int.MoreInts.BiInvInt renaming (BiInvℤ to ℤ) hiding (_+_ ; +-assoc ; +-comm ; +-zero ; +-suc ; +-pred ; neg ; _-_) public
 
 one : ℤ
 one = suc zero
 
 -one : ℤ
 -one = pred zero
-
-predl≡predr : (z : ℤ) → predl z ≡ predr z
-predl≡predr z = cong predl (sym (suc-predr z)) ∙ predl-suc (predr z)
-
-suc-predl : (n : ℤ) → suc (predl n) ≡ n
-suc-predl n = cong (λ n → suc (predl n)) (sym (suc-predr n)) ∙ cong suc (predl-suc _) ∙ suc-predr n
-
-suc-pred = suc-predl
 
 elim : ∀ {ℓ} (A : ℤ → Type ℓ)
        (z : A zero)
@@ -208,17 +190,17 @@ postulate
 --- Comparison with non-quotiented definition
 ---
 
-open import Cubical.Data.Int as Int using (Int ; pos ; negsuc ; sucInt ; predInt ; predSuc ; sucPred)
+open import Cubical.Data.Int as Int using (pos ; negsuc ; predSuc ; sucPred) renaming (ℤ to ℤ' ; sucℤ to sucℤ' ; predℤ to predℤ')
 
-toInt : ℤ → Int
-toInt zero = pos ℕ.zero
-toInt (suc n) = sucInt (toInt n)
-toInt (predl n) = predInt (toInt n)
-toInt (predr n) = predInt (toInt n)
+toInt : ℤ → ℤ'
+toInt zero = Int.pos ℕ.zero
+toInt (suc n) = Int.sucℤ (toInt n)
+toInt (predl n) = Int.predℤ (toInt n)
+toInt (predr n) = Int.predℤ (toInt n)
 toInt (predl-suc n i) = predSuc (toInt n) i
 toInt (suc-predr n i) = sucPred (toInt n) i
 
-fromInt : Int → ℤ
+fromInt : ℤ' → ℤ
 fromInt (pos n) = fromℕ n
 fromInt (negsuc n) = neg (fromℕ (ℕ.suc n))
 
@@ -226,7 +208,7 @@ open import Cubical.Core.Everything
 open import Cubical.Foundations.Isomorphism
 
 postulate
-  ℤ≃Int : ℤ ≃ Int
+  ℤ≃Int : ℤ' ≃ ℤ
   -- ℤ≃Int = isoToEquiv (iso toInt fromInt {!!} {!!})
 
 ---
@@ -342,9 +324,6 @@ is-evenℕ even-zero    = even-zero
 is-evenℕ (even-suc p) = even-suc (is-oddℕ p)
 is-oddℕ  (odd-suc p)  = odd-suc  (is-evenℕ p)
 
-abs : ℤ → ℕ
-abs n = Int.abs (toInt n)
-
 postulate
   zero-abs : {n : ℤ} → abs n ≡ 0 → n ≡ zero
 
@@ -404,8 +383,8 @@ postulate
   where
   f : ℤ → ℕ
   f n with toInt n
-  ... | pos k = 2 ℕ.* k
-  ... | negsuc k = suc (2 ℕ.* k)
+  ... | pos k = 2 ℕ.· k
+  ... | negsuc k = suc (2 ℕ.· k)
   g : ℕ → ℤ
   g n = aux (ℕ.parity n)
     where
