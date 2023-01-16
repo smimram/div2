@@ -9,7 +9,7 @@ jobs:
     - uses: actions/checkout@v2
     - name: Update agda
       run: |
-        sudo sed -i 's/jammy/kinetic/' /etc/apt/sources.list
+        sudo sed -i 's/jammy/lunar/' /etc/apt/sources.list
         sudo apt-get -y update
     - name: Install packages
       run: sudo apt-get -y install agda
