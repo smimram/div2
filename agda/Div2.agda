@@ -38,7 +38,6 @@ open import Tricho SA SB isom
 ---
 
 open import Partition
-open import Sigma
 
 -- we can create an equivalence between A and B by doing so on each chain
 bij-by-chain : {ℓ ℓ' ℓ'' : Level} {A : Type ℓ} {B : Type ℓ'}

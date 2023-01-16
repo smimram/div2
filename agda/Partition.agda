@@ -33,8 +33,6 @@ partition {A = A} R = isoToEquiv i
   -- Iso.rightInv i ([a] , (a , p) , b) = ΣPathP (p , toPathP (ΣPathP (ΣPathP ((transportRefl a) , (toPathP (squash/ _ _ _ p))) , (toPathP {!refl!}))))
   -- Iso.leftInv i (a , b) = refl
 
-open import Sigma
-
 partitionΣ : {ℓ ℓ' ℓ'' : Level} {A : Type ℓ} {B : A → Type ℓ'} (R : A → A → Type ℓ'') → Σ A B ≃ Σ (A / R) (λ x → Σ (fiber [_] x) (B ∘ fst))
 partitionΣ {A = A} {B = B} R =
   Σ A B ≃⟨ invEquiv (Σ-cong-equiv-fst (invEquiv (partition R))) ⟩

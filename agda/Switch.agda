@@ -17,7 +17,6 @@ open import Cubical.Data.Nat as ℕ hiding (isZero)
 open import Cubical.Data.Nat.Order
 open import Nat as ℕ hiding (isZero)
 open import Misc
-open import Sigma
 open import Cubical.HITs.PropositionalTruncation as ∥∥
 open import Cubical.HITs.SetQuotients as []
 
