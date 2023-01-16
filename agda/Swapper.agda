@@ -293,7 +293,7 @@ swapper-chain {c} = [].elim {P = λ c → elements c → chain-A≃B c} (λ _ �
 -- if we have a slope any element will do for the swapper
 slope-swapper : {c : Chains} → slope-chain c → chain-A≃B c
 slope-swapper {c} = [].elim
-  {B = λ c → slope-chain c → chain-A≃B c}
+  {P = λ c → slope-chain c → chain-A≃B c}
   (λ c → isSetΠ (λ _ → chain-A≃B-isSet c))
   (λ o sl → {!equiv (fst sl) (snd sl)!})
   (λ a b r → {!equiv-indep r!})
@@ -444,7 +444,7 @@ slope-swapper {c} = [].elim
 
   equiv-indep : {o o' : Arrows} (r : is-reachable-arr o o') →
                 PathP (λ i → slope-chain (eq/ o o' r i) → chain-A≃B (eq/ o o' r i)) (λ sl → equiv (fst sl) (snd sl)) (λ sl → equiv (fst sl) (snd sl))
-  equiv-indep {o} {o'} r = toPathP (funExt λ { (seq , nm) → equivEq _ _ {!equiv-indep1 seq nm!} })
+  equiv-indep {o} {o'} r = toPathP (funExt λ { (seq , nm) → equivEq {!equiv-indep1 seq nm!} })
     where
     oo' : [ o ] ≡ [ o' ]
     oo' = eq/ o o' r
@@ -457,38 +457,35 @@ slope-swapper {c} = [].elim
       where
       p : (nm : non-matched (fw o')) →
           subst chain-A≃B oo' (equiv (subst sequential-chain (sym oo') seq) (subst non-matched-chain (sym oo') ∣ nm ∣₁)) .fst ≡ equiv seq ∣ nm ∣₁ .fst
-      -- p nm with reachable-arr→reachable (reachable-arr-reveal r)
-      -- ... | inl r' = ?
-      -- ... | inr r' = ?
-      p nm =
-        let seq' : sequential-chain [ o ]
-            seq' = subst sequential-chain (sym oo') seq
-            nm' : non-matched-chain [ o ]
-            nm' = subst non-matched-chain (sym oo') ∣ nm ∣₁
-        in
-        --- NB: we need to to case here because pattern matching makes agda loop
-        case reachable-arr→reachable (reachable-arr-reveal r) of λ {
-          (inl r') →
-            let nmo : non-matched (fw o)
-                nmo = non-matched-indep r' nm
-            in
-            subst chain-A≃B oo' (equiv seq' nm') .fst     ≡⟨ cong (fst ∘ subst chain-A≃B oo' ∘ equiv seq') (non-matched-chain-isProp [ o ] nm' ∣ nmo ∣₁) ⟩
-            subst chain-A≃B oo' (equiv seq' ∣ nmo ∣₁) .fst ≡⟨ refl ⟩
-            subst chain-A≃B oo' (equiv' nmo) .fst         ≡⟨ cong fst (equiv'-indepo' r' nm) ⟩
-            equiv' nm .fst                                ≡⟨ refl ⟩
-            equiv seq ∣ nm ∣₁ .fst                         ∎
-            ;
-          (inr r') →
-            let nmo : non-matched (fw o)
-                nmo = non-matched-indep r' (transport (non-matched-op _) nm)
-            in
-            subst chain-A≃B oo' (equiv seq' nm') .fst     ≡⟨ cong (fst ∘ subst chain-A≃B oo' ∘ equiv seq') (non-matched-chain-isProp [ o ] nm' ∣ nmo ∣₁) ⟩
-            subst chain-A≃B oo' (equiv seq' ∣ nmo ∣₁) .fst ≡⟨ refl ⟩
-            subst chain-A≃B oo' (equiv' nmo ) .fst        ≡⟨ cong fst (equiv'-indepo' r' (transport (non-matched-op _) nm)) ⟩
-            equiv' (transport (non-matched-op _) nm) .fst ≡⟨ cong fst (equiv'-indep-op nm) ⟩
-            equiv' nm .fst                                ≡⟨ refl ⟩
-            equiv seq ∣ nm ∣₁ .fst                        ∎
-          }
+      p nm = {!!}
+        -- let seq' : sequential-chain [ o ]
+            -- seq' = subst sequential-chain (sym oo') seq
+            -- nm' : non-matched-chain [ o ]
+            -- nm' = subst non-matched-chain (sym oo') ∣ nm ∣₁
+        -- in
+        -- --- NB: we need to to case here because pattern matching makes agda loop
+        -- case reachable-arr→reachable (reachable-arr-reveal r) of λ {
+          -- (inl r') →
+            -- let nmo : non-matched (fw o)
+                -- nmo = non-matched-indep r' nm
+            -- in
+            -- subst chain-A≃B oo' (equiv seq' nm') .fst     ≡⟨ cong (fst ∘ subst chain-A≃B oo' ∘ equiv seq') (non-matched-chain-isProp [ o ] nm' ∣ nmo ∣₁) ⟩
+            -- subst chain-A≃B oo' (equiv seq' ∣ nmo ∣₁) .fst ≡⟨ refl ⟩
+            -- subst chain-A≃B oo' (equiv' nmo) .fst         ≡⟨ cong fst (equiv'-indepo' r' nm) ⟩
+            -- equiv' nm .fst                                ≡⟨ refl ⟩
+            -- equiv seq ∣ nm ∣₁ .fst                         ∎
+            -- ;
+          -- (inr r') →
+            -- let nmo : non-matched (fw o)
+                -- nmo = non-matched-indep r' (transport (non-matched-op _) nm)
+            -- in
+            -- subst chain-A≃B oo' (equiv seq' nm') .fst     ≡⟨ cong (fst ∘ subst chain-A≃B oo' ∘ equiv seq') (non-matched-chain-isProp [ o ] nm' ∣ nmo ∣₁) ⟩
+            -- subst chain-A≃B oo' (equiv seq' ∣ nmo ∣₁) .fst ≡⟨ refl ⟩
+            -- subst chain-A≃B oo' (equiv' nmo ) .fst        ≡⟨ cong fst (equiv'-indepo' r' (transport (non-matched-op _) nm)) ⟩
+            -- equiv' (transport (non-matched-op _) nm) .fst ≡⟨ cong fst (equiv'-indep-op nm) ⟩
+            -- equiv' nm .fst                                ≡⟨ refl ⟩
+            -- equiv seq ∣ nm ∣₁ .fst                        ∎
+          -- }
       -- we need to transport along nm = ∣ nm' |, which holds since these are propositions
       p' : (nm' : non-matched (fw o')) →
            subst chain-A≃B oo' (equiv (subst sequential-chain (sym oo') seq) (subst non-matched-chain (sym oo') nm)) .fst ≡ equiv seq nm .fst
