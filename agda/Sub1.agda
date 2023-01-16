@@ -105,11 +105,11 @@ Fin-suc n = isoToEquiv i
   Iso.fun i (suc k , k<n) = inl (k , (pred-≤-pred k<n))
   Iso.inv i (inl (k , k<n)) = suc k , suc-≤-suc k<n
   Iso.inv i (inr tt) = 0 , suc-≤-suc zero-≤
-  Iso.rightInv i (inl (zero , k<n)) = cong inl (ΣProp≡ (λ _ → m≤n-isProp) refl)
-  Iso.rightInv i (inl (suc k , k<n)) = cong inl (ΣProp≡ (λ _ → m≤n-isProp) refl)
+  Iso.rightInv i (inl (zero , k<n)) = cong inl (Σ≡Prop (λ _ → isProp≤) refl)
+  Iso.rightInv i (inl (suc k , k<n)) = cong inl (Σ≡Prop (λ _ → isProp≤) refl)
   Iso.rightInv i (inr tt) = refl
-  Iso.leftInv i (zero , k<n) = ΣProp≡ (λ _ → m≤n-isProp) refl
-  Iso.leftInv i (suc k , k<n) = ΣProp≡ (λ _ → m≤n-isProp) refl
+  Iso.leftInv i (zero , k<n) = Σ≡Prop (λ _ → isProp≤) refl
+  Iso.leftInv i (suc k , k<n) = Σ≡Prop (λ _ → isProp≤) refl
 
 Fin-zero-suc : {n : ℕ} → ¬ (Fin 0 ≡ Fin (suc n))
 Fin-zero-suc p = ¬Fin0 (transport (sym p) (0 , suc-≤-suc zero-≤))

@@ -1,5 +1,7 @@
 all:
+	agda Sub1.agda
 	agda Div2.agda
+	agda Spaces.agda
 
 clean:
 	rm -f *.agdai

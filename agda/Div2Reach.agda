@@ -10,7 +10,6 @@ open import Cubical.Foundations.Univalence
 open import Cubical.Foundations.Transport
 open import Cubical.Foundations.GroupoidLaws
 open import Cubical.Relation.Nullary
-open import Cubical.Relation.Nullary.DecidableEq
 open import Cubical.Relation.Binary
 open import Cubical.Data.Empty as ⊥
 open import Cubical.Data.Unit renaming (Unit to ⊤)
@@ -22,7 +21,6 @@ open import Cubical.Data.Nat.Order
 open import Nat as ℕ
 open import Misc
 open import Partition
-open import Sigma
 open import Cubical.HITs.PropositionalTruncation as ∥∥
 open import Cubical.HITs.SetQuotients as []
 
@@ -42,7 +40,7 @@ reachable-chain-A≃B {c} e = (a : chainA c) → reachable-arr (inl (chainA→A 
 
 wb-reachable : {c : Chains} (wbc : well-bracketed-chain c) → reachable-chain-A≃B (matching-equiv {c} wbc)
 wb-reachable {c} wbc = [].elim
-  {B = λ c → (wbc : well-bracketed-chain c) → reachable-chain-A≃B {c} (matching-equiv wbc)}
+  {P = λ c → (wbc : well-bracketed-chain c) → reachable-chain-A≃B {c} (matching-equiv wbc)}
   (λ _ → isSetΠ λ _ → isSetΠ λ _ → reachable-arr-isSet _ _)
   reachable'
   (λ o o' r → {!!}) -- independence of the origin
@@ -64,7 +62,7 @@ wb-reachable {c} wbc = [].elim
 
 sw-reachable : {c : Chains} (swc : switched-chain c) → reachable-chain-A≃B (swapper-chain (switched-element c swc))
 sw-reachable {c} swc = [].elim
-  {B = λ c → (swc : switched-chain c) → reachable-chain-A≃B (swapper-chain (switched-element c swc))}
+  {P = λ c → (swc : switched-chain c) → reachable-chain-A≃B (swapper-chain (switched-element c swc))}
   (λ _ → isSetΠ λ _ → isSetΠ λ _ → reachable-arr-isSet _ _)
   reachable'
   {!!}
@@ -78,12 +76,12 @@ sw-reachable {c} swc = [].elim
     a≡ = inl-get-left l
     se : elements [ o ]
     se = switched-element [ o ] swc
-    t =
-      chainB→B (equivFun (swapper-chain se) (a , l)) ≡⟨ refl ⟩
-      chainB→B (equivFun (swapper-chain-iso' se) (a , l)) ≡⟨ refl ⟩
-      chainB→B ((subst chainB (sym (element-chain se)) ∘ fst (swapper-chain-iso (fst se)) ∘ subst chainA (element-chain se)) (a , l)) ≡⟨ {!!} ⟩
-      {!!} ∎
-    b≡' : chainB→B (equivFun (swapper-chain se) (a , l)) ≡ ?
+    -- t =
+      -- chainB→B (equivFun (swapper-chain se) (a , l)) ≡⟨ refl ⟩
+      -- chainB→B (equivFun (swapper-chain-iso' se) (a , l)) ≡⟨ refl ⟩
+      -- chainB→B ((subst chainB (sym (element-chain se)) ∘ fst (swapper-chain-iso (fst se)) ∘ subst chainA (element-chain se)) (a , l)) ≡⟨ {!!} ⟩
+      -- {!!} ∎
+    b≡' : chainB→B (equivFun (swapper-chain se) (a , l)) ≡ {!!}
     b≡' = {!!}
     b≡ : inr (chainB→B (equivFun (swapper-chain se) (a , l))) ≡ fst (fst (swapper-dchain (elements→delements se)))
     b≡ = {!!}
@@ -92,10 +90,10 @@ sw-reachable {c} swc = [].elim
 
 sl-reachable : {c : Chains} (slc : slope-chain c) → reachable-chain-A≃B (slope-swapper {c} slc)
 sl-reachable {c} slc = [].elim
-  {B = λ c → (slc : slope-chain c) → reachable-chain-A≃B (slope-swapper {c} slc)}
+  {P = λ c → (slc : slope-chain c) → reachable-chain-A≃B (slope-swapper {c} slc)}
   (λ _ → isSetΠ λ _ → isSetΠ λ _ → reachable-arr-isSet _ _)
   reachable'
-  ? -- independence of the origin
+  {!!} -- independence of the origin
   c slc
   where
   reachable' : (o : Arrows) (slc : slope-chain [ o ]) → (a : chainA [ o ]) → reachable-arr (inl (chainA→A a)) (inr (chainB→B (equivFun (slope-swapper slc) a)))
@@ -111,7 +109,7 @@ ConwayFun : A → B
 ConwayFun = equivFun Conway
 
 ConwayFun-def : (a : A) →
-                ConwayFun a ≡ chainB→B (equivFun (Conway-chain [ inl a ]) ((inl a , refl) , subst in-left (sym (retEq (invEquiv (partition is-reachable-arr)) (inl a))) (is-inl a)))
+                ConwayFun a ≡ chainB→B (equivFun (Conway-chain [ inl a ]) ((inl a , refl) , subst in-left (sym (secEq (invEquiv (partition is-reachable-arr)) (inl a))) (is-inl a)))
 ConwayFun-def a = refl
 
 Conway-reachable : (a : A) → reachable-arr (inl a) (inr (ConwayFun a))
@@ -122,9 +120,9 @@ Conway-reachable a = r'
   ca : chainA [ inl a ]
   ca = (inl a , refl) , is-inl a
   ca' : chainA [ inl a ]
-  ca' = (inl a , refl) , subst in-left (sym (retEq (invEquiv (partition is-reachable-arr)) (inl a))) (is-inl a)
+  ca' = (inl a , refl) , subst in-left (sym (secEq (invEquiv (partition is-reachable-arr)) (inl a))) (is-inl a)
   ca≡ca' : ca ≡ ca'
-  ca≡ca' = ΣProp≡ (λ _ → in-left-isProp _) refl
+  ca≡ca' = Σ≡Prop (λ _ → in-left-isProp _) refl
   r : reachable-arr (inl (chainA→A ca)) (inr (chainB→B (equivFun (Conway-chain [ inl a ]) ca)))
   r = Conway-chain-reachable' [ inl a ] ca
   r' : reachable-arr (inl (chainA→A ca)) (inr (chainB→B (equivFun (Conway-chain [ inl a ]) ca')))
