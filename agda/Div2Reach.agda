@@ -26,14 +26,14 @@ open import Cubical.HITs.SetQuotients as []
 
 open import Ends
 
-module Div2Reach {ℓ} {A B : Type ℓ} (SA : isSet A) (SB : isSet B) (isom : A × End ≃ B × End) where
+module Div2Reach {ℓ} {A B : Type ℓ} (DA : Discrete A) (DB : Discrete B) (isom : A × End ≃ B × End) where
 
-open import Arrows SA SB isom
-open import Bracketing SA SB isom
-open import Switch SA SB isom
-open import Swapper SA SB isom
-open import Tricho SA SB isom
-open import Div2 SA SB isom
+open import Arrows DA DB isom
+open import Bracketing DA DB isom
+open import Switch DA DB isom
+open import Swapper DA DB isom
+open import Tricho DA DB isom
+open import Div2 DA DB isom
 
 reachable-chain-A≃B : {c : Chains} (e : chain-A≃B c) → Type _
 reachable-chain-A≃B {c} e = (a : chainA c) → reachable-arr (inl (chainA→A a)) (inr (chainB→B (equivFun e a)))
