@@ -14,6 +14,7 @@ open import Cubical.HITs.PropositionalTruncation as ∥∥
 open import Cubical.HITs.SetQuotients as []
 open import Misc
 open import Ends
+open import Z
 
 module Tricho {ℓ} {A B : Type ℓ} (DA : Discrete A) (DB : Discrete B) (isom : A × End ≃ B × End) where
 
@@ -71,28 +72,10 @@ switched-isDec : (a : Arrows) → Dec (switched a)
 switched-isDec a = switched-end-isDec (fw a)
   where
   switched-end-isDec : (a : Ends) → Dec (switched-end a)
-  switched-end-isDec a = LPO.DecΣℤ (switched-end-at a) {!switched-end-at-isDec a!}
+  switched-end-isDec a = LPO.DecΣℤ (switched-end-at a) (switched-end-at-isDec a)
 
--- tricho : (c : Chains) → Tricho c
--- tricho c =
-  -- [].elim Tricho-isSet T T≡ c
-  -- where
-  -- T : (a : Arrows) → Tricho [ a ]
-  -- T a with LEM (well-bracketed-isProp a)
-  -- ... | inl iswb = wb iswb
-  -- ... | inr ¬wb with LEM (switched-isProp a)
-  -- ... | inl issw = sw issw
-  -- ... | inr ¬sw = sl (¬switched⇒sequential a ¬sw , (¬∀⇒∃¬ (λ _ → matched-isProp _) ¬wb))
-  -- T≡ : (a b : Arrows) (r : ∥ reachable-arr a b ∥₁) → PathP (λ i → Tricho (eq/ a b r i)) (T a) (T b)
-  -- T≡ a b r with LEM (well-bracketed-isProp a) | LEM (well-bracketed-isProp b)
-  -- ... | inl awb | inl bwb = toPathP (cong wb (well-bracketed-chain-isProp [ b ] _ bwb))
-  -- ... | inl awb | inr b¬wb = ⊥.rec (b¬wb (transport (well-bracketed-indep a b (reachable-arr-reveal r)) awb))
-  -- ... | inr a¬wb | inl bwb = ⊥.rec (a¬wb (transport (sym (well-bracketed-indep a b (reachable-arr-reveal r))) bwb))
-  -- ... | inr a¬wb | inr b¬wb with LEM (switched-isProp a) | LEM (switched-isProp b)
-  -- ... | inl asw | inl bsw = toPathP (cong sw (switched-chain-isProp [ b ] _ bsw))
-  -- ... | inl asw | inr b¬sw = ⊥.rec (b¬sw (transport (switched-indep (reachable-arr-reveal r)) asw))
-  -- ... | inr a¬sw | inl bsw = ⊥.rec (a¬sw (transport (sym (switched-indep (reachable-arr-reveal r))) bsw))
-  -- ... | inr a¬sw | inr b¬sw = toPathP (cong sl (slope-chain-isProp [ b ] _ _))
+¬∀⇒∃¬ : {ℓ : Level} (P : ℤ → Type ℓ) → ((n : ℤ) → Dec (P n)) → ¬ ((n : ℤ) → P n) → Σ ℤ (λ n → ¬ (P n))
+¬∀⇒∃¬ P D N = Dec→NNE (LPO.DecΣℤ _ (λ n → Dec¬ (D n))) (¬∀¬¬⇒¬¬∃¬ λ ¬¬P → N λ n → Dec→NNE (D n) (¬¬P n))
 
 tricho : (c : Chains) → Tricho c
 tricho c =
@@ -101,6 +84,16 @@ tricho c =
   T : (a : Arrows) → Tricho [ a ]
   T a with well-bracketed-isDec a
   ... | yes iswb = wb iswb
-  ... | no ¬wb = {!!}
+  ... | no ¬wb with switched-isDec a
+  ... | yes issw = sw issw
+  ... | no ¬sw = sl (¬switched⇒sequential a ¬sw , ∣ ¬∀⇒∃¬ _ (λ n → matched-isDec _) ¬wb ∣₁)
   T≡ : (a b : Arrows) (r : ∥ reachable-arr a b ∥₁) → PathP (λ i → Tricho (eq/ a b r i)) (T a) (T b)
-  T≡ = {!!}
+  T≡ a b r with well-bracketed-isDec a | well-bracketed-isDec b
+  ... | yes awb | yes bwb = toPathP (cong wb (well-bracketed-chain-isProp [ b ] _ bwb))
+  ... | yes awb | no b¬wb = ⊥.rec (b¬wb (transport (well-bracketed-indep a b (reachable-arr-reveal r)) awb))
+  ... | no a¬wb | yes bwb = ⊥.rec (a¬wb (transport (sym (well-bracketed-indep a b (reachable-arr-reveal r))) bwb))
+  ... | no a¬wb | no b¬wb with switched-isDec a | switched-isDec b
+  ... | yes asw | yes bsw = toPathP (cong sw (switched-chain-isProp [ b ] _ bsw))
+  ... | yes asw | no b¬sw = ⊥.rec (b¬sw (transport (switched-indep (reachable-arr-reveal r)) asw))
+  ... | no a¬sw | yes bsw = ⊥.rec (a¬sw (transport (sym (switched-indep (reachable-arr-reveal r))) bsw))
+  ... | no a¬sw | no b¬sw = toPathP (cong sl (slope-chain-isProp [ b ] _ _))

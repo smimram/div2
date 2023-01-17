@@ -11,9 +11,6 @@ open import Z
 
 module LPO where
 
--- WLPO : {ℓ ℓ' : Level} (A : Type ℓ) → Type (ℓ-max ℓ (ℓ-suc ℓ'))
--- WLPO {ℓ' = ℓ'} A = (P : A → Type ℓ') → ((n : A) → isProp (P n)) → ((n : A) → Dec (P n)) → Dec ((n : A) → P n)
-
 LPO : {ℓ ℓ' : Level} (A : Type ℓ) → Type (ℓ-max ℓ (ℓ-suc ℓ'))
 LPO {ℓ' = ℓ'} A = (P : A → Type ℓ') → ((n : A) → isProp (P n)) → ((n : A) → Dec (P n)) → ((n : A) → P n) ⊎ Σ A (λ n → ¬ (P n))
 
@@ -25,13 +22,18 @@ postulate
 DecΣ : {ℓ ℓ' : Level} {A : Type ℓ} → LPO A → (P : A → Type ℓ') → ((n : A) → Dec (P n)) → Dec (Σ A P)
 DecΣ LPO P D with LPO (λ n → ¬ (P n)) (λ _ → isProp¬ _) (λ n → Dec¬ (D n))
 ... | inl ¬p = no λ { (n , p) → ¬p n p }
-... | inr (n , ¬¬p) = yes (n , DEC→NNE (D n) ¬¬p)
+... | inr (n , ¬¬p) = yes (n , Dec→NNE (D n) ¬¬p)
 
 DecΣℕ : {ℓ : Level} (P : ℕ → Type ℓ) → ((n : ℕ) → Dec (P n)) → Dec (Σ ℕ P)
 DecΣℕ = DecΣ LPOℕ
 
 DecΣℤ : {ℓ : Level} (P : ℤ → Type ℓ) → ((n : ℤ) → Dec (P n)) → Dec (Σ ℤ P)
 DecΣℤ = DecΣ LPOℤ
+
+DecΠℕ : {ℓ : Level} (P : ℕ → Type ℓ) → ((n : ℕ) → isProp (P n)) → ((n : ℕ) → Dec (P n)) → Dec ((n : ℕ) → P n)
+DecΠℕ P PP D with LPOℕ P PP D
+... | inl p = yes p
+... | inr (n , ¬p) = no λ p → ¬p (p n)
 
 DecΠℤ : {ℓ : Level} (P : ℤ → Type ℓ) → ((n : ℤ) → isProp (P n)) → ((n : ℤ) → Dec (P n)) → Dec ((n : ℤ) → P n)
 DecΠℤ P PP D with LPOℤ P PP D

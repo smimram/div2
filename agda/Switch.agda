@@ -45,7 +45,14 @@ switch a =
    )
 
 switch-isDec : (a : Arrows) → Dec (switch a)
-switch-isDec a = Dec× {!Dec¬ ?!} {!!}
+switch-isDec a = Dec× (Dec¬ (matched-isDec a)) (DecΣℕ _ (λ n → Dec× (DiscreteEnd _ _) (Dec× (Dec¬ (matched-isDec _)) (DecΠ≤' _ (λ n → matched-isDec _) n))))
+  where
+  -- easy variant of DecΠ≤
+  DecΠ≤' : {ℓ : Level} (P : ℕ → Type ℓ) → ((n : ℕ) → Dec (P n)) → (n : ℕ) → Dec ((k : ℕ) → suc k < n → P k)
+  DecΠ≤' P D n with DecΠ≤ P D n
+  ... | yes p = yes λ k sk<n → p k (<-trans Cubical.Data.Nat.Order.≤-refl sk<n)
+  ... | no ¬p = {!!}
+  open import LPO
 
 switch-isProp : (a : Arrows) → isProp (switch a)
 switch-isProp a (m , n , e , b , l) (m' , n' , e' , b' , l') i =

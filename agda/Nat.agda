@@ -55,6 +55,7 @@ open import Cubical.Induction.WellFounded
 open import Cubical.HITs.PropositionalTruncation as ∥∥
 
 -- if there exists a natural number, we can find it!
+-- now in Cubical.Data.Nat.Order.Recursive
 find : {ℓ : Level} (P : ℕ → Type ℓ) → ((n : ℕ) → isProp (P n)) → ((n : ℕ) → Dec (P n)) → ∥ Σ ℕ P ∥₁ → Σ ℕ P
 find P prop dec ex = fst first , fst (snd first)
   where
@@ -83,3 +84,12 @@ find P prop dec ex = fst first , fst (snd first)
   ... | inr ¬P = ⊥.rec (¬P n ≤-refl Pn)
   first : Σ ℕ isFirst
   first = ∥∥.rec first-isProp (λ { (n , Pn) → search n Pn }) ex
+
+-- decidability of bounded universal quantification
+DecΠ≤ : {ℓ : Level} (P : ℕ → Type ℓ) → ((n : ℕ) → Dec (P n)) → (n : ℕ) → Dec ((k : ℕ) → k < n → P k)
+DecΠ≤ P D zero = yes λ { k k<0 → ⊥.rec (¬-<-zero k<0) }
+DecΠ≤ P D (suc n) with DecΠ≤ P D n
+... | no ¬p = no λ f → ¬p λ k k<n → f k (<-trans k<n ≤-refl)
+... | yes p with D n
+... | yes pn = yes λ k k<sn → case <-split k<sn of λ { (inl k<n) → p k k<n ; (inr k≡n) → subst P (sym k≡n) pn }
+... | no ¬pn = no λ f → ¬pn (f n ≤-refl)

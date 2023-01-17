@@ -386,6 +386,13 @@ Dec¬ : {ℓ : Level} {A : Type ℓ} → Dec A → Dec (¬ A)
 Dec¬ (yes a) = no λ ¬a → ¬a a
 Dec¬ (no ¬a) = yes λ a → ¬a a
 
-DEC→NNE : {ℓ : Level} {A : Type ℓ} → Dec A → ¬ ¬ A → A
-DEC→NNE (yes a) ¬¬a = a
-DEC→NNE (no ¬a) ¬¬a = ⊥.elim (¬¬a ¬a)
+Dec→NNE : {ℓ : Level} {A : Type ℓ} → Dec A → ¬ ¬ A → A
+Dec→NNE (yes a) ¬¬a = a
+Dec→NNE (no ¬a) ¬¬a = ⊥.elim (¬¬a ¬a)
+
+---
+--- Logic
+---
+
+¬∀¬¬⇒¬¬∃¬ : ∀ {ℓ ℓ'} {A : Type ℓ} {B : A → Type ℓ'} → ¬ ((x : A) → ¬ ¬ (B x)) → ¬ ¬ (Σ A (λ x → ¬ (B x)))
+¬∀¬¬⇒¬¬∃¬ f g = f λ a b → g (a , b)

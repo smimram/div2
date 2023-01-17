@@ -10,6 +10,7 @@ open import Cubical.Data.Sigma
 open import Cubical.Relation.Nullary
 -- TODO: use addition, negation and subtraction from the standard library
 open import Cubical.Data.Int.MoreInts.BiInvInt renaming (BiInvℤ to ℤ) hiding (_+_ ; +-assoc ; +-comm ; +-zero ; +-suc ; +-pred ; neg ; _-_) public
+open import Misc
 
 one : ℤ
 one = suc zero
@@ -414,3 +415,10 @@ postulate
   ≺-wellfounded : WellFounded _≺_
   -- -- from ℕ.<-wellfounded
   -- ≺-wellfounded = subst WellFounded {!sym ≺≡<!} {!ℕ.<-wellfounded!} -- 
+
+-- postulate
+  -- -- follows from ℕ.find and ℤ≃ℕ by transport
+  -- find : {ℓ : Level} (P : ℤ → Type ℓ) → ((n : ℤ) → isProp (P n)) → ((n : ℤ) → Dec (P n)) → ∥ Σ ℤ P ∥₁ → Σ ℤ P
+
+-- ¬∀⇒∃¬ : {ℓ : Level} (P : ℤ → Type ℓ) → ((n : ℤ) → Dec (P n))  → ¬ ((n : ℤ) → P n) → Σ ℤ (λ n → ¬ (P n))
+-- ¬∀⇒∃¬ P D N = find _ (λ n → isProp¬ _) (λ n → Dec¬ (D n)) {!!}
