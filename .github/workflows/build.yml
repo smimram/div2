@@ -15,7 +15,7 @@ jobs:
       run: sudo apt-get -y install agda
     - name: Download cubical library
       run: |
-        git clone https://github.com/agda/cubical.git
+        git clone https://github.com/agda/cubical.git -b v0.4
         mkdir ~/.agda
         echo "cubical" > ~/.agda/defaults
         echo "`pwd`/cubical/cubical.agda-lib" > ~/.agda/libraries
