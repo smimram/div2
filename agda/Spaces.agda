@@ -29,7 +29,7 @@ open import Cubical.HITs.SetQuotients as []
 
 open import Ends
 
-module Spaces {ℓ} {A B : Type ℓ} (equiv : (A × End) ≃ (B × End)) where
+module Spaces {ℓ} {A B : Type ℓ} (DA : Discrete ∥ A ∥₂) (DB : Discrete ∥ B ∥₂) (equiv : (A × End) ≃ (B × End)) where
 
 -- functoriality of 0-truncation
 
@@ -152,19 +152,13 @@ glueing-equiv' {A = A} {B = B} {P = P} {Q = Q} p f = isoToEquiv (Σ-cong-iso (eq
 --
 -- import previous work on division by 2 on sets obtained by set truncation
 
-A₂isSet : isSet ∥ A ∥₂
-A₂isSet = isSetSetTrunc
-
-B₂isSet : isSet ∥ B ∥₂
-B₂isSet = isSetSetTrunc
-
 A₂E≃B₂E : ∥ A ∥₂ × End ≃ ∥ B ∥₂ × End
 A₂E≃B₂E = compEquiv (invEquiv (∥∥₂×set End-isSet)) (compEquiv (∥∥₂-equiv equiv) (∥∥₂×set End-isSet))
 
 open import Ends
-import Arrows A₂isSet B₂isSet A₂E≃B₂E as AS
-import Div2 A₂isSet B₂isSet A₂E≃B₂E as DS
-import Div2Reach A₂isSet B₂isSet A₂E≃B₂E as DRS
+import Arrows DA DB A₂E≃B₂E as AS
+import Div2 DA DB A₂E≃B₂E as DS
+import Div2Reach DA DB A₂E≃B₂E as DRS
 open import ArrowsBase equiv
 
 open import Partition
