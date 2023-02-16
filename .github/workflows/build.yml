@@ -19,8 +19,10 @@ jobs:
         mkdir ~/.agda
         echo "cubical" > ~/.agda/defaults
         echo "`pwd`/cubical/cubical.agda-lib" > ~/.agda/libraries
-    - name: Build Agda
-      run: make
+    - name: Check proof
+      run: |
+        agda --version
+        make
     - name: Build doc
       run: make -C agda html
     - name: Deploy doc
