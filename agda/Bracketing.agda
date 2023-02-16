@@ -124,8 +124,8 @@ matched-isProp x (n , z , p) (n' , z' , p') = ΣPathP (n≡n' , toPathP (ΣPathP
   ... | gt n'<n = ⊥.elim (p (suc n') (suc-≤-suc n'<n) z')
 
 matched-isDec : (a : Arrows) → Dec (matched a)
-matched-isDec a = DecΣℕ (matched-at a) (matched-at-isDec a)
-  where open import LPO
+matched-isDec a = LPO.DecΣℕ (matched-at a) (matched-at-isDec a)
+  where import LPO
 
 -- matching end
 match-end : {a : Arrows} → matched a → Ends

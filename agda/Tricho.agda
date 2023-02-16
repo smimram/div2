@@ -60,13 +60,13 @@ abstract
 
 -- using the LPO from there on...
 
-open import LPO as LPO
+import LPO as LPO
 
 well-bracketed-isDec : (a : Arrows) → Dec (well-bracketed a)
 well-bracketed-isDec a = well-bracketed-end-isDec (fw a)
   where
   well-bracketed-end-isDec : (a : Ends) → Dec (well-bracketed-end a)
-  well-bracketed-end-isDec a = DecΠℤ (λ n → matched (arrow (iterate n a))) (λ _ → matched-isProp _) (λ _ → matched-isDec _)
+  well-bracketed-end-isDec a = LPO.DecΠℤ (λ n → matched (arrow (iterate n a))) (λ _ → matched-isProp _) (λ _ → matched-isDec _)
 
 switched-isDec : (a : Arrows) → Dec (switched a)
 switched-isDec a = switched-end-isDec (fw a)
